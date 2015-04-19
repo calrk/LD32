@@ -1,0 +1,65 @@
+*{
+	-webkit-margin-before: 0em;
+	-webkit-margin-after: 0em;
+	-webkit-margin-start: 0px;
+	-webkit-margin-end: 0px;
+}
+body{
+	margin: 0px;
+	background-color: #282828;
+	font-family: Arial;
+}
+
+header{
+	color: white;
+	background-color: black;
+	height:60px;
+	padding: 5px;
+	position:fixed;
+	top:0;
+	left:0;
+	right:0;
+}
+
+header h1{
+	font-size: 29px;
+	padding: 13px 0px 10px 110px;
+	background-position: 315px 8px;
+	background-repeat: no-repeat;
+}
+
+.headerPadding{
+	height:70px;
+	width:100%;
+}
+
+#scene{
+	position:fixed;
+	top:70;
+}
+
+#canvas{
+	position:fixed;
+	left:0;
+}
+#hud{
+	position:fixed;
+	left:0;
+}
+
+canvas{
+	width:50%;
+	height:100%;
+}
+
+#controls{
+	position:fixed;
+	right:0;
+	top:70;
+
+	background-color: #999999;
+}
+
+.hided{
+	display:none;
+}
