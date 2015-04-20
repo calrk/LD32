@@ -39,17 +39,19 @@ function init(){
 }
 
 function load(){
-	if(!loader.ready()){
+	if(!loader.ready() || !sounds.ready()/* || !textures.ready()*/){
 		requestAnimationFrame(load);
 		return;
 	}
 	console.log("Loaded.");
 
+	$('#startButton').removeAttr('disabled');
+	$('#startButton')[0].value = 'Start';
+
 	gameController = new GameController();
 
 	resize();
 	render();
-
 }
 
 function render(){
@@ -90,6 +92,11 @@ function endGame(asd){
 	// gameController.setGameState('playing');
 }
 
+function changeVolume(elem){
+	var vol = parseFloat(elem.value);
+	sounds.setVolume(vol);
+}
+
 window.onload = function(){
 	init();
 	resize();
@@ -100,22 +107,45 @@ function resize(){
 	console.log('resizing');
 	width = $(window).width();
 	height = $(window).height()-70;//1022;
+	console.log(height);
+	var top = '70px';
+	$('#header').show()	;
+	if(height <= 700){
+		height = $(window).height();
+		top = '0px';
+		$('#header').hide();
+	}
 
 	$('#scene').css({
 		width:width+'px', 
 		height:height,
-		top:'70px'
+		top:top
 	});
 
 	$('#canvas').css({
 		width:width+'px', 
 		height:height,
-		top:'70px'
+		top:top
 	});
 	$('#hud').css({
 		width:width+'px', 
 		height:height,
-		top:'70px'
+		top:top
+	});
+	$('#start').css({
+		width:width+'px', 
+		height:height,
+		top:top
+	});
+	$('#end').css({
+		width:width+'px', 
+		height:height,
+		top:top
+	});
+	$('#lost').css({
+		width:width+'px', 
+		height:height,
+		top:top
 	});
 
 	renderer.setSize(width, height);

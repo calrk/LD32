@@ -43,7 +43,7 @@ function GameController(){
 		this.enemies[i].reset();
 		var x = Math.floor(Math.random()*worldVars.width-1)+1;
 		var z = Math.floor(Math.random()*worldVars.length-1)+1;
-		while(!world.canMove(x, z) && !(x <= 2 && z <= 2)){
+		while(!world.canMove(x, z) || (x <= 2 && z <= 2)){
 			x = Math.floor(Math.random()*worldVars.width);
 			z = Math.floor(Math.random()*worldVars.length);
 		}
@@ -67,7 +67,7 @@ function GameController(){
 			this.enemies[i].reset();
 			var x = Math.floor(Math.random()*worldVars.width-1)+1;
 			var z = Math.floor(Math.random()*worldVars.length-1)+1;
-			while(!world.canMove(x, z) && !(x <= 2 && z <= 2)){
+			while(!world.canMove(x, z) || (x <= 2 && z <= 2)){
 				x = Math.floor(Math.random()*worldVars.width);
 				z = Math.floor(Math.random()*worldVars.length);
 			}
@@ -114,11 +114,13 @@ function GameController(){
 				if(this.getRemainingInsects() == 0){
 					gameState = "won";
 					endGame('end');
+					hud.hide();
 				}
 
 				if(!this.player.isAlive()){
 					gameState = "lost";
 					endGame('lost');
+					hud.hide();
 				}
 
 				break;
@@ -193,7 +195,7 @@ function GameController(){
 								return 'move';
 							}
 						}
-						return false;
+						return 'blocked';
 					}
 				}
 			}

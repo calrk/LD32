@@ -6,6 +6,11 @@ function Textures(params){
 	var ctx = canvas.getContext('2d');
 	
 	canvas.width = canvas.height = 512;
+	var isReady = false;
+
+	this.ready = function(){
+		return isReady;
+	}
 
 	this.generate = function(){
 		console.log("Generating Textures...");
@@ -21,83 +26,14 @@ function Textures(params){
 		var cloudNorm = new CLARITY.NormalGenerator({intensity: 0.0075}).process(cloud);
 		generateTexture('wallNorm', cloudNorm);
 
-		/*var green = new CLARITY.FillRGB({red: 0, green: 150, blue: 0}).process(frame);
-		green = new CLARITY.Multiply().process([cloud, green]);
-		var brown = new CLARITY.FillRGB({red: 88, green: 62, blue: 44}).process(frame);
-		brown = new CLARITY.Multiply().process([icloud, brown]);
-		var grass = new CLARITY.Blend({ratio:0.75}).process([green, brown]);
-		grass = new CLARITY.hsvShifter({lightness:2}).process(grass);
-		generateTexture('grass', grass);
-		generateTexture('dirt', brown);*/
-
-		/*brown = new CLARITY.FillRGB({red: 87, green: 39, blue: 0}).process(frame);
-		brown = new CLARITY.Multiply().process([icloud, brown]);
-		generateTexture('dirtPath', brown);*/
-
-		/*var tilesNorm = new CLARITY.Brickulate({horizontalSegs:8, verticalSegs: 8, grooveSize: 2}).process(frame);
-		brown = new CLARITY.FillRGB({red: 40, green: 40, blue: 40}).process(frame);
-		var moss = new CLARITY.FillRGB({red: 0, green: 150, blue: 0}).process(frame);
-		moss = new CLARITY.Multiply().process([cloud, moss]);
-		var tiles = new CLARITY.Puzzler({horizontalSegs:8, verticalSegs: 8}).process(cloud);
-		// tiles = new CLARITY.AddSub().process([tiles, moss]);
-		tiles = new CLARITY.AddSub({subtractive:true}).process([tiles, tilesNorm]);
-		tiles = new CLARITY.AddSub({}).process([tiles, brown]);
-		generateTexture('tiles', tiles);
-
-		tilesNorm = new CLARITY.Brickulate({horizontalSegs:8, verticalSegs: 8, grooveSize: 2}).process(frame);
-		tilesNorm = new CLARITY.Invert().process(tilesNorm);
-		tilesNorm = new CLARITY.NormalGenerator({intensity: 0.0075}).process(tilesNorm);
-		tilesNorm = new CLARITY.NormalFlip({green: true}).process(tilesNorm);
-		tilesNorm = new CLARITY.Noise({intensity:30, monochromatic: false}).process(tilesNorm);
-		tilesNorm = new CLARITY.Blur({radius:1}).process(tilesNorm);
-		generateTexture('tilesNorm', tilesNorm);*/
-
 		var noiseNorm = new CLARITY.FillRGB({red: 128, green: 128, blue: 255}).process(frame);
 		noiseNorm = new CLARITY.Noise({intensity:30, monochromatic: false}).process(noiseNorm);
 		noiseNorm = new CLARITY.Blur({radius:2}).process(noiseNorm);
 		generateTexture('noiseNorm', noiseNorm);
 		generateTexture('dirtCeilNorm', noiseNorm);
 
-		/*ctx.drawImage(loader.getImage('dust'), 0, 0, canvas.width, canvas.height);
-		frame = ctx.getImageData(0,0,width,height);
-		generateTexture('dust', frame);*/
-
-		/*ctx.drawImage(loader.getImage('tombstone2'), 0, 0, canvas.width, canvas.height);
-		frame = ctx.getImageData(0,0,width,height);
-		var normal = new CLARITY.NormalGenerator({intensity: 0.01}).process(frame);
-		normal = new CLARITY.Noise({intensity:30, monochromatic: false}).process(normal);
-		generateTexture('tombstone2Norm', normal);
-
-
-		var frame1, frame2;
-		frame2 = new CLARITY.FillRGB({red: 208, green: 186, blue: 137}).process(frame);
-		frame1 = new CLARITY.Blend().process([cloud, frame2]);
-
-		frame2 = new CLARITY.FillRGB({red: 163, green: 133, blue: 87}).process(frame2);
-		frame2 = new CLARITY.Blend().process([icloud, frame2]);
-
-		ctx.drawImage(loader.getImage('grass'), 0, 0, canvas.width, canvas.height);
-		yellow = new CLARITY.FillRGB({red: 208, green: 186, blue: 137}).process(frame);
-		frame = ctx.getImageData(0,0,width,height);
-		var hay = new CLARITY.Blend().process([frame, yellow]);
-		// hay = new CLARITY.Multiply().process([cloud, hay]);
-		// hay = new CLARITY.hsvShifter({value:3}).process(hay);
-		generateTexture('hay', hay);
-
-		ctx.drawImage(loader.getImage('grass'), 0, 0, canvas.width, canvas.height);
-		frame = ctx.getImageData(0,0,width,height);
-		normal = new CLARITY.NormalGenerator({intensity: 0.02}).process(frame);
-		normal = new CLARITY.Noise({intensity:30, monochromatic: false}).process(normal);
-		generateTexture('hayNorm', normal);
-		// normal = new CLARITY.NormalIntensity({intensity: 0.5}).process(normal);
-		// generateTexture('hayNormBig', normal);
-
-
-		ctx.drawImage(loader.getImage('wood'), 0, 0, canvas.width, canvas.height);
-		frame = ctx.getImageData(0,0,width,height);
-		generateTexture('wood', frame);*/
-		
 		console.log("Textures Generated.");
+		isReady = true;
 	}
 
 	function generateTexture(name, frame){

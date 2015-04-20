@@ -34,6 +34,7 @@
 			<div id='hudContent'>
 				<h2>Health: <span id='healthHud'></span>%</h2>
 				<h2>Insects Remaining: <span id='insectsHud'></span></h2>
+				<h2>Volume: <input id='volume' type='range' min='0' max='2' step='0.05' onchange='changeVolume(this);' value='1'/></h2>
 			</div>
 		</div>
 	</div>
@@ -75,7 +76,7 @@
 			</table>
 
 			<hr>
-			<input type='button' value='Start' onclick='startGame();'>
+			<p>Click here to play when loaded - <input id='startButton' type='button' value='Loading...' onclick='startGame();' disabled></p>
 			<hr>
 			<p>Created by Clark Lavery for Ludum Dare 32.</p>
 		</div>
@@ -100,7 +101,7 @@
 		<div class='menu'>
 			<h1>Giant Insects!</h1>
 			
-			<p>You have died to the insects, the last hope for humanity is lost and with it the human race...</p>
+			<p>You have died to the insects. The last hope for humanity is lost and with it, the human race...</p>
 
 			<p>Thank you for playing!</p>
 
@@ -111,7 +112,7 @@
 		</div>
 	</div>
 
-	<header>
+	<header id='header'>
 		<h1>
 			LD32  - <span style='font-size:0.8em'>Giant Insects</span>
 		</h1>

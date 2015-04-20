@@ -2,6 +2,8 @@ window.AudioContext = window.AudioContext || window.webkitAudioContext;
 
 function Sounds(params){
 	var self = this;
+	var loadingCount = 0;
+	var loadedCount = 0;
 	this.sounds = {};
 	this.loops = {};
 	// this.soundSettings = {};
@@ -15,11 +17,21 @@ function Sounds(params){
 	this.atmosAudio = new AudioContext();
 	this.atmosGain = this.atmosAudio.createGain();
 	this.atmosGainValue = 0.25;
+
+	this.ready = function(){
+		if(loadingCount == loadedCount){
+			return true;
+		}
+		return false;
+	}
 	
 	this.setVolume = function(val) {
-		var val = (val/100)/4;
+		var val = val;
 		if(val < 0){
 			val = 0;
+		}
+		if(val > 2){
+			val = 2;
 		}
 		this.volume = val;
 	}
@@ -43,7 +55,9 @@ function Sounds(params){
 		this.play('dirt_step_'+rand);
 	}
 
+
 	this.loadSound = function(url) {
+		loadingCount ++;
 		var ctx = this;
 		var request = new XMLHttpRequest();
 		request.open('GET', './sounds/' + url + '.ogg', true);
@@ -54,6 +68,7 @@ function Sounds(params){
 			ctx.audio.decodeAudioData(request.response, function(buffer) {
 				ctx.sounds[url] = buffer;
 			}, onError);
+			loadedCount ++;
 		}
 		request.send();
 	};

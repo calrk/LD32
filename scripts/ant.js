@@ -156,7 +156,30 @@ Actor.Ant.prototype.stillAction = function(dt){
 	this.idleAnim();
 	if(this.lastMoveTime > this.idleTime){
 		var rand = Math.random()*8;
-		if(rand < 6 && this.lastMoveSuccess != 'blocked'){
+		var direction = gameController.player.model.position.clone().sub(this.model.position);
+		direction.y = 0;
+		direction.round();
+		var dot = direction.dot(this.right.clone())
+
+		if(direction.length() <= 2){
+			this.lastMoveSuccess = true;
+			if(dot == 0){
+				var dot2 = direction.dot(this.forward.clone());
+				if(dot2 < 0){
+					this.setRotation(1);
+				}
+				else{
+					this.lastMoveSuccess = this.setMove(this.forward, 1);
+				}
+			}
+			else if(dot < 0){
+				this.setRotation(1);
+			}
+			else{
+				this.setRotation(-1);
+			}
+		}
+		else if(rand < 6 && this.lastMoveSuccess != 'blocked'){
 			this.lastMoveSuccess = this.setMove(this.forward, 1);
 		}
 		else if(rand < 7){
