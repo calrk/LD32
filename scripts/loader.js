@@ -8,17 +8,8 @@ function Loader(params){
 
 	// jsonloader.load("models/test.js", modelToScene);
 
-	/*loadModel('fence');
-	loadModel('woodfence');
-	loadModel('tombstone1');
-	loadModel('tombstone2');
-	loadModel('hay');
-	loadModel('player');
-
-	loadImage('tombstone2');
-	loadImage('grass');
-	loadImage('wood');*/
 	loadImage('dust', true);
+	loadImage('blood', true);
 	loadImage('newspaper', true);
 
 	function loadModel(name){

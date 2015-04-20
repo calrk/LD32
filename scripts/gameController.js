@@ -1,9 +1,11 @@
 
 function GameController(){
 	var worldVars = {
-		length: 10,
-		width: 10
+		length: 20,
+		width: 20
 	}
+
+	var atmosCooldown = 0;
 
 	textures.setOptions(worldVars);
 	textures.generate();
@@ -27,29 +29,29 @@ function GameController(){
 	this.player.init();
 
 	this.enemies = [];
-	this.enemies[0] = new Actor.Fly();
-	this.enemies[0].init();
-
-	this.enemies[1] = new Actor.Ant();
-	this.enemies[1].init();
+	for(var i = 0; i < 10; i++){
+		if(Math.random() < 0.5){
+			this.enemies[i] = new Actor.Fly();
+		}
+		else{
+			this.enemies[i] = new Actor.Ant();
+		}
+		this.enemies[i].init();
+	}
 
 	for(var i = 0; i < this.enemies.length; i++){
 		this.enemies[i].reset();
-		var x = Math.floor(Math.random()*worldVars.width);
-		var z = Math.floor(Math.random()*worldVars.length);
-		while(!world.canMove(x, z)){
+		var x = Math.floor(Math.random()*worldVars.width-1)+1;
+		var z = Math.floor(Math.random()*worldVars.length-1)+1;
+		while(!world.canMove(x, z) && !(x <= 2 && z <= 2)){
 			x = Math.floor(Math.random()*worldVars.width);
 			z = Math.floor(Math.random()*worldVars.length);
 		}
 		this.enemies[i].setPosition(x, z);
-		/*if(world.canMove(x, z)){
-			for(var j = i; j < this.enemies.length; j++){
-				// var pos = this.enemies[i].spacesOccupied();
-			}
-		}*/
 	}
 
 	var hud = new Hud();
+	this.explosions = [];
 	
 	var gameState = "setup";
 
@@ -63,9 +65,9 @@ function GameController(){
 		hud.update();
 		for(var i = 0; i < this.enemies.length; i++){
 			this.enemies[i].reset();
-			var x = Math.floor(Math.random()*worldVars.width);
-			var z = Math.floor(Math.random()*worldVars.length);
-			while(!world.canMove(x, z)){
+			var x = Math.floor(Math.random()*worldVars.width-1)+1;
+			var z = Math.floor(Math.random()*worldVars.length-1)+1;
+			while(!world.canMove(x, z) && !(x <= 2 && z <= 2)){
 				x = Math.floor(Math.random()*worldVars.width);
 				z = Math.floor(Math.random()*worldVars.length);
 			}
@@ -81,6 +83,7 @@ function GameController(){
 	// this.reset();
 	this.start = function(){
 		gameState = "playing";
+		hud.show();
 		hud.update();
 	}
 
@@ -88,45 +91,69 @@ function GameController(){
 		// hud.updateText(gameState);
 		switch(gameState){
 			case "setup":
-				if(keysDown[32]){
-					gameState = "playing";
-				}
 				break;
 			case "playing":
-				if(keysDown[keys.r]){
-					this.reset();
-				}
 				this.player.update(dt);
+
+				atmosCooldown += dt;
+				if(atmosCooldown > 4){
+					sounds.playAtmospheric();
+					atmosCooldown = 0 - Math.random()*2;
+				}
 
 				world.update(dt);
 
-				var anyLeft = false;
 				for(var i = 0; i < this.enemies.length; i++){
 					this.enemies[i].update(dt);
-					if(this.enemies[i].isAlive()){
-						anyLeft = true;
-					}
 				}
 
-				if(!anyLeft){
-					console.log('wonned');
-					//game is over
-					/*if(keysDown[82]){
-						this.reset();
-						gameState = "setup";
-					}*/
+				for(var i = 0; i < this.explosions.length; i++){
+					this.explosions[i].update(dt);
+				}
+
+				if(this.getRemainingInsects() == 0){
+					gameState = "won";
+					endGame('end');
+				}
+
+				if(!this.player.isAlive()){
+					gameState = "lost";
+					endGame('lost');
 				}
 
 				break;
 			case "over":
 			case "lost":
 			case "won":
-				if(keysDown[82]){
-					this.reset();
-					gameState = "setup";
-				}
 				break;
 		}
+	}
+
+	this.setGameState = function(state){
+		gameState = state;
+	}
+
+	this.spawnExplosion = function(position){
+		var explosion = new Explosion({position: position});
+		this.explosions.unshift(explosion);
+	}
+
+	this.removeExplosion = function(explosion){
+		for(var i = 0; i < this.explosions.length; i++){
+			var index = this.explosions.indexOf(explosion);
+			this.explosions[index] = this.explosions[this.explosions.length-1];
+			this.explosions.pop();
+		}
+	}
+
+	this.getRemainingInsects = function(){
+		var count = 0;
+		for(var i = 0; i < this.enemies.length; i++){
+			if(this.enemies[i].isAlive()){
+				count++;
+			}
+		}
+		return count;
 	}
 
 	this.canMove = function(target, object, forwards){
@@ -157,6 +184,7 @@ function GameController(){
 								if(forwards){
 									// player attacking enemy;
 									this.enemies[i].takeDamage();
+									hud.update();
 									return 'attack';
 								}
 								return 'blocked';

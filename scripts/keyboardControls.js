@@ -28,8 +28,9 @@ document.addEventListener('keyup', function(event) {
 	keysDown[event.keyCode] = false;
 });
 
-window.oncontextmenu = function(event) {
+/*window.oncontextmenu = function(event) {
 	event.preventDefault();
 	event.stopPropagation();
 	return false;
 };
+*/

@@ -5,7 +5,6 @@ var Actor = function(){
 Actor.prototype = {
 	model : new THREE.Object3D(),
 	state : 'still',
-	self : this,
 	health : 100,
 
 	forward : new THREE.Vector3(0, 0, -1),
@@ -21,6 +20,8 @@ Actor.prototype = {
 	prevEuler : new THREE.Euler(0, 0, 0, 'XYZ'),
 	targetRot : 0,
 	interpPercent : 0,
+	takeDamageSound : undefined,
+	dieSound : undefined,
 
 	init: function(){
 		this.createModel();
@@ -34,6 +35,23 @@ Actor.prototype = {
 
 	takeDamage : function(damage){
 		this.health -= damage || 10;
+		gameController.spawnExplosion(this.model.position);
+		var self = this;
+		if(this.takeDamageSound){
+			setTimeout(function(){
+				sounds.play(self.takeDamageSound);
+			}, 150);
+		}
+		this.takeDamageSelf();
+	},
+	takeDamageSelf: function(){},
+	die : function(){
+		var self = this;
+		if(this.dieSound){
+			setTimeout(function(){
+				sounds.play(self.dieSound);
+			}, 150);
+		}
 	},
 
 	setPosition: function(x, z){
@@ -89,6 +107,7 @@ Actor.prototype = {
 			if(this.state != 'dead'){
 				this.interpPercent = 0;
 				this.state = 'dead';
+				this.die();
 			}
 			this.dyingAction(dt);
 		}
@@ -214,13 +233,13 @@ Actor.prototype = {
 		var result = gameController.canMove(this.targetPos, this, forwards);
 		if(result == 'move'){
 			this.state = 'moving';
-			return true;
+			return result;
 		}
 		else if(result == 'blocked'){
 			target = target.clone().multiplyScalar(0.15);
 			this.targetPos = this.model.position.clone().add(target);
 			this.state = 'movingFail';
-			return false;
+			return result;
 		}
 		else if(result == 'attack'){
 			if(target.equals(this.forward)){
@@ -229,7 +248,7 @@ Actor.prototype = {
 			target = target.clone().multiplyScalar(0.15);
 			this.targetPos = this.model.position.clone().add(target);
 			this.state = 'attacking';
-			return false;
+			return result;
 		}
 	},
 
@@ -360,12 +379,15 @@ Actor.prototype = {
 Actor.Ant = function(params){
 	Actor.call(this, params);
 	this.lastMoveSuccess = true;
+
+	this.takeDamageSound = 'ant_damage';
+	this.dieSound = 'ant_die';
 }
 
 Actor.Ant.prototype = Object.create(Actor.prototype);
 
 Actor.Ant.prototype.initSelf = function(){
-	this.idleTime = 1.5;
+	this.idleTime = 1.25;
 }
 Actor.Ant.prototype.resetSelf = function(){
 	this.model.traverse(function(joint){
@@ -510,16 +532,16 @@ Actor.Ant.prototype.stillAction = function(dt){
 		this.interpPercent = 0;
 	}
 	this.idleAnim();
-	if(this.lastMoveTime > 1){
-		var rand = Math.random()*6;
-		if(rand < 4 && this.lastMoveSuccess){
+	if(this.lastMoveTime > this.idleTime){
+		var rand = Math.random()*8;
+		if(rand < 6 && this.lastMoveSuccess != 'blocked'){
 			this.lastMoveSuccess = this.setMove(this.forward, 1);
 		}
-		else if(rand < 5){
+		else if(rand < 7){
 			this.setRotation(1);
 			this.lastMoveSuccess = true;
 		}
-		else if(rand < 6){
+		else if(rand < 8){
 			this.setRotation(-1);
 			this.lastMoveSuccess = true;
 		}
@@ -691,16 +713,69 @@ Actor.Ant.prototype.dieAnim = function(){
 	this.model.position.y = this.interpolator([0, 1], [-0.75, -0.78], this.interpPercent);
 	this.model.rotation.y += 0.005;
 }
+
+function Explosion(parameters){
+	parameters = parameters || {};
+	var position = parameters.position.clone() || new THREE.Vector3(0,0,0);
+
+	var pointCloud;
+	var lifeTime = 0;
+
+	var unique = Math.random();
+
+	var bloodMaterial = new THREE.PointCloudMaterial({
+		color: 0xFF0000, 
+		size: 0.1,
+		map: textures.getTexture('blood'),
+		blending: THREE.AdditiveBlending,
+		transparent: true
+	});
+
+	this.init = function(){
+		var particle = new THREE.Geometry();
+
+		for(var i = 0; i < 15; i++){
+			particle.vertices.push(new THREE.Vector3(Math.random()*0.5-0.25, Math.random()*0.5-0.25, Math.random()*0.5-0.25));
+		}
+
+		pointCloud = new THREE.PointCloud(particle, bloodMaterial);
+		// pointCloud.sortParticles = true;
+		pointCloud.position.copy(position);
+		scene.add(pointCloud);
+		gameController.explosions.push(this);
+	}
+	this.init();
+
+	this.update = function(dt){
+		lifeTime += dt;
+		for(var i = 0; i < pointCloud.geometry.vertices.length; i++){
+			pointCloud.geometry.vertices[i].multiplyScalar(1.02);
+			pointCloud.geometry.verticesNeedUpdate = true;
+		}
+		pointCloud.material.opacity -= dt;
+		if(lifeTime > 2){
+			this.destroy();
+		}
+	}
+
+	this.destroy = function(){
+		scene.remove(pointCloud);
+		gameController.removeExplosion(self);
+	}
+}
 Actor.Fly = function(params){
 	Actor.call(this, params);
-	this.lastMoveSuccess = true;
+	this.lastMoveSuccess = 'blocked';
 	this.prevHeight = 0;
+
+	this.takeDamageSound = 'fly_damage';
+	this.dieSound = 'fly_die';
 }
 
 Actor.Fly.prototype = Object.create(Actor.prototype);
 
 Actor.Fly.prototype.initSelf = function(){
-	this.idleTime = 1;
+	this.idleTime = 0.75;
 }
 
 Actor.Fly.prototype.resetSelf = function(){
@@ -894,16 +969,16 @@ Actor.Fly.prototype.stillAction = function(dt){
 		this.interpPercent = 0;
 	}
 	this.idleAnim();
-	if(this.lastMoveTime > 1){
-		var rand = Math.random()*6;
-		if(rand < 4 && this.lastMoveSuccess){
+	if(this.lastMoveTime > this.idleTime){
+		var rand = Math.random()*8;
+		if(rand < 6 && this.lastMoveSuccess != 'blocked'){
 			this.lastMoveSuccess = this.setMove(this.forward, 1);
 		}
-		else if(rand < 5){
+		else if(rand < 7){
 			this.setRotation(1);
 			this.lastMoveSuccess = true;
 		}
-		else if(rand < 6){
+		else if(rand < 8){
 			this.setRotation(-1);
 			this.lastMoveSuccess = true;
 		}
@@ -1127,9 +1202,11 @@ Actor.Fly.prototype.dieAnim = function(){
 
 function GameController(){
 	var worldVars = {
-		length: 10,
-		width: 10
+		length: 20,
+		width: 20
 	}
+
+	var atmosCooldown = 0;
 
 	textures.setOptions(worldVars);
 	textures.generate();
@@ -1153,29 +1230,29 @@ function GameController(){
 	this.player.init();
 
 	this.enemies = [];
-	this.enemies[0] = new Actor.Fly();
-	this.enemies[0].init();
-
-	this.enemies[1] = new Actor.Ant();
-	this.enemies[1].init();
+	for(var i = 0; i < 10; i++){
+		if(Math.random() < 0.5){
+			this.enemies[i] = new Actor.Fly();
+		}
+		else{
+			this.enemies[i] = new Actor.Ant();
+		}
+		this.enemies[i].init();
+	}
 
 	for(var i = 0; i < this.enemies.length; i++){
 		this.enemies[i].reset();
-		var x = Math.floor(Math.random()*worldVars.width);
-		var z = Math.floor(Math.random()*worldVars.length);
-		while(!world.canMove(x, z)){
+		var x = Math.floor(Math.random()*worldVars.width-1)+1;
+		var z = Math.floor(Math.random()*worldVars.length-1)+1;
+		while(!world.canMove(x, z) && !(x <= 2 && z <= 2)){
 			x = Math.floor(Math.random()*worldVars.width);
 			z = Math.floor(Math.random()*worldVars.length);
 		}
 		this.enemies[i].setPosition(x, z);
-		/*if(world.canMove(x, z)){
-			for(var j = i; j < this.enemies.length; j++){
-				// var pos = this.enemies[i].spacesOccupied();
-			}
-		}*/
 	}
 
 	var hud = new Hud();
+	this.explosions = [];
 	
 	var gameState = "setup";
 
@@ -1189,9 +1266,9 @@ function GameController(){
 		hud.update();
 		for(var i = 0; i < this.enemies.length; i++){
 			this.enemies[i].reset();
-			var x = Math.floor(Math.random()*worldVars.width);
-			var z = Math.floor(Math.random()*worldVars.length);
-			while(!world.canMove(x, z)){
+			var x = Math.floor(Math.random()*worldVars.width-1)+1;
+			var z = Math.floor(Math.random()*worldVars.length-1)+1;
+			while(!world.canMove(x, z) && !(x <= 2 && z <= 2)){
 				x = Math.floor(Math.random()*worldVars.width);
 				z = Math.floor(Math.random()*worldVars.length);
 			}
@@ -1207,6 +1284,7 @@ function GameController(){
 	// this.reset();
 	this.start = function(){
 		gameState = "playing";
+		hud.show();
 		hud.update();
 	}
 
@@ -1214,45 +1292,69 @@ function GameController(){
 		// hud.updateText(gameState);
 		switch(gameState){
 			case "setup":
-				if(keysDown[32]){
-					gameState = "playing";
-				}
 				break;
 			case "playing":
-				if(keysDown[keys.r]){
-					this.reset();
-				}
 				this.player.update(dt);
+
+				atmosCooldown += dt;
+				if(atmosCooldown > 4){
+					sounds.playAtmospheric();
+					atmosCooldown = 0 - Math.random()*2;
+				}
 
 				world.update(dt);
 
-				var anyLeft = false;
 				for(var i = 0; i < this.enemies.length; i++){
 					this.enemies[i].update(dt);
-					if(this.enemies[i].isAlive()){
-						anyLeft = true;
-					}
 				}
 
-				if(!anyLeft){
-					console.log('wonned');
-					//game is over
-					/*if(keysDown[82]){
-						this.reset();
-						gameState = "setup";
-					}*/
+				for(var i = 0; i < this.explosions.length; i++){
+					this.explosions[i].update(dt);
+				}
+
+				if(this.getRemainingInsects() == 0){
+					gameState = "won";
+					endGame('end');
+				}
+
+				if(!this.player.isAlive()){
+					gameState = "lost";
+					endGame('lost');
 				}
 
 				break;
 			case "over":
 			case "lost":
 			case "won":
-				if(keysDown[82]){
-					this.reset();
-					gameState = "setup";
-				}
 				break;
 		}
+	}
+
+	this.setGameState = function(state){
+		gameState = state;
+	}
+
+	this.spawnExplosion = function(position){
+		var explosion = new Explosion({position: position});
+		this.explosions.unshift(explosion);
+	}
+
+	this.removeExplosion = function(explosion){
+		for(var i = 0; i < this.explosions.length; i++){
+			var index = this.explosions.indexOf(explosion);
+			this.explosions[index] = this.explosions[this.explosions.length-1];
+			this.explosions.pop();
+		}
+	}
+
+	this.getRemainingInsects = function(){
+		var count = 0;
+		for(var i = 0; i < this.enemies.length; i++){
+			if(this.enemies[i].isAlive()){
+				count++;
+			}
+		}
+		return count;
 	}
 
 	this.canMove = function(target, object, forwards){
@@ -1283,6 +1385,7 @@ function GameController(){
 								if(forwards){
 									// player attacking enemy;
 									this.enemies[i].takeDamage();
+									hud.update();
 									return 'attack';
 								}
 								return 'blocked';
@@ -1304,13 +1407,24 @@ function GameController(){
 function Hud(params){
 	var self = this;
 	var health;
+	var insects;
 
 	this.initHud = function(){
 		health = document.getElementById('healthHud');
+		insects = document.getElementById('insectsHud');
+	}
+
+	this.show = function(){
+		$('#hud').show();
+	}
+
+	this.hide = function(){
+		$('#hud').hide();
 	}
 
 	this.update = function(){
 		health.innerHTML = gameController.player.getHealth();
+		insects.innerHTML = gameController.getRemainingInsects();
 	}
 
 	this.initHud();
@@ -1346,12 +1460,12 @@ document.addEventListener('keyup', function(event) {
 	keysDown[event.keyCode] = false;
 });
 
-window.oncontextmenu = function(event) {
+/*window.oncontextmenu = function(event) {
 	event.preventDefault();
 	event.stopPropagation();
 	return false;
 };
-
+*/
 
 function Loader(params){
 	var models = {};
@@ -1362,17 +1476,8 @@ function Loader(params){
 
 	// jsonloader.load("models/test.js", modelToScene);
 
-	/*loadModel('fence');
-	loadModel('woodfence');
-	loadModel('tombstone1');
-	loadModel('tombstone2');
-	loadModel('hay');
-	loadModel('player');
-
-	loadImage('tombstone2');
-	loadImage('grass');
-	loadImage('wood');*/
 	loadImage('dust', true);
+	loadImage('blood', true);
 	loadImage('newspaper', true);
 
 	function loadModel(name){
@@ -1433,7 +1538,7 @@ Actor.Player = function(params){
 		down: keys.s,
 	};
 
-	this.camera = new THREE.PerspectiveCamera(75, width/height, 0.1, 100);
+	this.camera = new THREE.PerspectiveCamera(75, width/height, 0.1, 10);
 	this.light = new THREE.PointLight(0xffffff, 1, 10);
 	this.camera.add(this.light);
 }
@@ -1460,6 +1565,17 @@ Actor.Player.prototype.createModel = function(){
 	weaponJoint.add(weapon);
 }
 
+Actor.Player.prototype.takeDamageSelf = function(damage){
+	setTimeout(function(){
+		if(Math.random() < 0.5){
+			sounds.play('pain_1');
+		}
+		else{
+			sounds.play('pain_2');
+		}
+	}, 150);
+},
+
 Actor.Player.prototype.initSelf = function(){
 	// sceneHUD.add(this.model);
 	// sceneHUD.add(this.model2);
@@ -1468,7 +1584,7 @@ Actor.Player.prototype.initSelf = function(){
 Actor.Player.prototype.resetSelf = function(){
 	this.health = 100;
 	this.model.position.x = 2;
-	this.model.position.z = 4;
+	this.model.position.z = 2;
 	this.prevPos = this.model.position;
 	this.targetPos = this.model.position;
 
@@ -1478,23 +1594,43 @@ Actor.Player.prototype.resetSelf = function(){
 };
 
 Actor.Player.prototype.stillAction = function(dt){
-	if(keysDown[this.controls.left]){
-		this.setMove(this.right.clone().multiplyScalar(-1));
+	var result = false;
+	if(keysDown[this.controls.left] || keysDown[keys.left]){
+		result = this.setMove(this.right.clone().multiplyScalar(-1));
+		sounds.playFootstep();
 	}
-	if(keysDown[this.controls.right]){
-		this.setMove(this.right);
+	if(keysDown[this.controls.right] || keysDown[keys.right]){
+		result = this.setMove(this.right);
+		sounds.playFootstep();
 	}
-	if(keysDown[this.controls.up]){
-		this.setMove(this.forward);
+	if(keysDown[this.controls.up] || keysDown[keys.up]){
+		result = this.setMove(this.forward);
+		sounds.playFootstep();
 	}
-	if(keysDown[this.controls.down]){
-		this.setMove(this.forward.clone().multiplyScalar(-1));
+	if(keysDown[this.controls.down] || keysDown[keys.down]){
+		result = this.setMove(this.forward.clone().multiplyScalar(-1));
+		sounds.playFootstep();
 	}
 	if(keysDown[this.controls.rotateLeft]){
 		this.setRotation(1);
+		sounds.playFootstep();
 	}
 	if(keysDown[this.controls.rotateRight]){
 		this.setRotation(-1);
+		sounds.playFootstep();
+	}
+	if(result == 'move'){
+		/*setTimeout(function(){
+			sounds.playFootstep();
+		}, 250);*/
+	}
+	else if(result == 'attack'){
+		sounds.play('swing');
+	}
+	else if(result == 'blocked'){
+		setTimeout(function(){
+			sounds.play('thud');
+		}, 150);
 	}
 };
 
@@ -1506,6 +1642,136 @@ Actor.Player.prototype.attackAnim = function(){
 	this.model.getObjectByName('weapon').rotation.x = this.interpolator([0, 0.33, 0.66, 1], [0, 0.35, -0.75, 0], this.interpPercent);
 	this.model.getObjectByName('weapon').rotation.z = this.interpolator([0, 0.33, 0.66, 1], [0, -0.1, 0.25, 0], this.interpPercent);
 }
+window.AudioContext = window.AudioContext || window.webkitAudioContext;
+
+function Sounds(params){
+	var self = this;
+	this.sounds = {};
+	this.loops = {};
+	// this.soundSettings = {};
+
+	this.audio = new AudioContext();
+	this.audioGain = this.audio.createGain();
+	this.volume = 0.15;
+	// this.audioGain.gain.value = 0.15;
+	this.audioCompressor = this.audio.createDynamicsCompressor();
+
+	this.atmosAudio = new AudioContext();
+	this.atmosGain = this.atmosAudio.createGain();
+	this.atmosGainValue = 0.25;
+	
+	this.setVolume = function(val) {
+		var val = (val/100)/4;
+		if(val < 0){
+			val = 0;
+		}
+		this.volume = val;
+	}
+	
+	this.play = function(sound) {
+		if(!this.sounds[sound]){
+			console.log("Sound not loaded: " + sound);
+			return;
+		}
+		this.audioGain.gain.value = this.volume;
+		var source = this.audio.createBufferSource();
+		source.buffer = this.sounds[sound];
+		source.connect(this.audioCompressor);
+		this.audioCompressor.connect(this.audioGain);
+		this.audioGain.connect(this.audio.destination);
+		source.start(0);
+	}
+
+	this.playFootstep = function() {
+		var rand = Math.floor(Math.random()*3.99)+1;
+		this.play('dirt_step_'+rand);
+	}
+
+	this.loadSound = function(url) {
+		var ctx = this;
+		var request = new XMLHttpRequest();
+		request.open('GET', './sounds/' + url + '.ogg', true);
+		request.responseType = 'arraybuffer';
+
+		// Decode asynchronously
+		request.onload = function() {
+			ctx.audio.decodeAudioData(request.response, function(buffer) {
+				ctx.sounds[url] = buffer;
+			}, onError);
+		}
+		request.send();
+	};
+
+	function onError(err){
+		console.log(err);
+	}
+
+	this.playLoop = function(sound) {
+		if(!this.sounds[sound]){
+			console.log("Sound not loaded: " + sound);
+			return;
+		}
+		if(this.loops[sound]){
+			console.log("Sound already looping: " + sound);
+			return;
+		}
+		var source = this.audio.createBufferSource();
+		source.loop = true;
+		source.buffer = this.sounds[sound];
+		source.connect(this.audioGain);
+		this.audioGain.connect(this.audio.destination);
+		source.start(0);
+
+		this.loops[sound] = source;
+	}
+
+	this.stopLoop = function(sound) {
+		if(!this.loops[sound]){
+			console.log("Sound not Playing: " + sound);
+			return;
+		}
+		this.loops[sound].stop(0);
+		delete this.loops[sound];
+	}
+
+	this.playAtmospheric = function() {
+		// setTimeout(self.playAtmospheric, Math.random()*2000+3500);
+
+		var atmos = ['insect_1', 'insect_2', 'insect_3', 'insect_4'];
+		var pos = Math.floor(Math.random()*atmos.length);
+
+		if(!self.sounds[atmos[pos]]){
+			console.log("Sound not loaded: " + sound);
+			return;
+		}
+
+		self.atmosGain.gain.value = self.atmosGainValue*self.volume;
+
+		var source = self.atmosAudio.createBufferSource();
+		source.buffer = self.sounds[atmos[pos]];
+		source.connect(self.atmosGain);
+		self.atmosGain.connect(self.atmosAudio.destination);
+		source.start(0);
+	}
+
+	this.loadSound('dirt_step_1');
+	this.loadSound('dirt_step_2');
+	this.loadSound('dirt_step_3');
+	this.loadSound('dirt_step_4');
+	this.loadSound('swing');
+	this.loadSound('thud');
+	this.loadSound('fly_damage');
+	this.loadSound('fly_die');
+	this.loadSound('ant_damage');
+	this.loadSound('ant_die');
+	this.loadSound('insect_1');
+	this.loadSound('insect_2');
+	this.loadSound('insect_3');
+	this.loadSound('insect_4');
+	this.loadSound('pain_1');
+	this.loadSound('pain_2');
+}
+
 
 function Textures(params){
 	var textures = {};
@@ -1755,7 +2021,8 @@ function World(params){
 		size: 0.1,
 		map: textures.getTexture('dust'),
 		blending: THREE.AdditiveBlending,
-		transparent: true});
+		transparent: true
+	});
 
 	this.reset = function(){
 		content = [];
@@ -1791,7 +2058,7 @@ function World(params){
 		//add outside walls
 		for(var i = 0; i < params.width+2; i++){
 			for(var j = 0; j < params.length+2; j++){
-				if(i == 0 || i == params.width || j == 0 || j == params.length+1){
+				if(i == 0 || i == params.width+1 || j == 0 || j == params.length+1){
 					var wall = new THREE.Mesh(new THREE.BoxGeometry(2, 2, 2), wallMat);
 					wall.position.x = 2*i;
 					wall.position.z = 2*j;
@@ -1810,7 +2077,18 @@ function World(params){
 				var x = Math.floor(Math.random()*2);
 				var y = Math.floor(Math.random()*2);
 
-				var wall = new THREE.Mesh(new THREE.BoxGeometry(2, 2, 2), wallMat);
+				var type = Math.floor(Math.random()*3);
+				var wall;
+				if(type == 0){
+					wall = this.createStalagtite();
+				}
+				else if(type == 1){
+					wall = this.createStalagmite();
+				}
+				else{
+					wall = this.createWall();
+				}
+				// var wall = new THREE.Mesh(new THREE.BoxGeometry(2, 2, 2), wallMat);
 				wall.position.x = 2*(i + x);
 				wall.position.z = 2*(j + y);
 				world.add(wall);
@@ -1828,6 +2106,94 @@ function World(params){
 			dustSystems[j].offset = Math.random()*Math.PI*2;
 			world.add(dustSystems[j]);
 		}
+	}
+
+	this.createStalagmite = function(){
+		var mergeGeometry = new THREE.Geometry();
+		var scale = Math.random()*0.4+0.8;
+
+		var mite = new THREE.Mesh(new THREE.CylinderGeometry( 0, 0.25*scale, 1.5*scale, 32 ), wallMat);
+		mite.position.x = Math.random()*1.5-0.75;
+		mite.position.y = -(2-1.5*scale)/2;
+		mite.position.z = Math.random()*1.5-0.75;
+		mite.matrixAutoUpdate && mite.updateMatrix();
+		matrix = mite.matrix;
+		mergeGeometry.merge(mite.geometry, matrix);
+
+		scale = Math.random()*0.2+0.9;
+		mite = new THREE.Mesh(new THREE.CylinderGeometry( 0, 0.25*scale, 1.5*scale, 32 ), wallMat);
+		mite.position.x = Math.random()*1.5-0.75;
+		mite.position.y = -(2-1.5*scale)/2;
+		mite.position.z = Math.random()*1.5-0.75;
+		mite.matrixAutoUpdate && mite.updateMatrix();
+		matrix = mite.matrix;
+		mergeGeometry.merge(mite.geometry, matrix);
+
+		scale = Math.random()*0.2+0.9;
+		mite = new THREE.Mesh(new THREE.CylinderGeometry( 0, 0.125*scale, 0.5*scale, 32 ), wallMat);
+		mite.position.x = Math.random()*1.5-0.75;
+		mite.position.y = -(2-0.5*scale)/2;
+		mite.position.z = Math.random()*1.5-0.75;
+		mite.matrixAutoUpdate && mite.updateMatrix();
+		matrix = mite.matrix;
+		mergeGeometry.merge(mite.geometry, matrix);
+
+		scale = Math.random()*0.2+0.9;
+		mite = new THREE.Mesh(new THREE.CylinderGeometry( 0, 0.125*scale, 0.5*scale, 32 ), wallMat);
+		mite.position.x = Math.random()*1.5-0.75;
+		mite.position.y = -(2-0.5*scale)/2;
+		mite.position.z = Math.random()*1.5-0.75;
+		mite.matrixAutoUpdate && mite.updateMatrix();
+		matrix = mite.matrix;
+		mergeGeometry.merge(mite.geometry, matrix);
+
+		mite = new THREE.Mesh(new THREE.CylinderGeometry( 0, 0.125*scale, 0.25*scale, 32 ), wallMat);
+		mite.position.x = Math.random()*1.5-0.75;
+		mite.position.y = -(2-0.25*scale)/2;
+		mite.position.z = Math.random()*1.5-0.75;
+		mite.matrixAutoUpdate && mite.updateMatrix();
+		matrix = mite.matrix;
+		mergeGeometry.merge(mite.geometry, matrix);
+
+		mite = new THREE.Mesh(new THREE.SphereGeometry( 1, 16, 16 ), wallMat);
+		mite.position.x = Math.random()*0.5-0.25;
+		mite.position.y = -1.75;
+		mite.position.z = Math.random()*0.5-0.25;
+		mite.matrixAutoUpdate && mite.updateMatrix();
+		matrix = mite.matrix;
+		mergeGeometry.merge(mite.geometry, matrix);
+
+		object = new THREE.Mesh(mergeGeometry, wallMat);
+		object.rotation.y = Math.PI*Math.random()*2;
+		return object;
+	}
+
+	this.createStalagtite = function(){
+		var object = this.createStalagmite();
+		object.rotation.x = Math.PI;
+
+		var scale = Math.random()*0.2+0.9;
+		var mite = new THREE.Mesh(new THREE.CylinderGeometry( 0, 0.125*scale, 0.5*scale, 32 ), wallMat);
+		mite.position.x = Math.random()*1-0.5;
+		mite.position.y = (2-0.5*scale)/2;
+		mite.position.z = Math.random()*1-0.5;
+		mite.rotation.x = Math.PI;
+		object.add(mite);
+
+		scale = Math.random()*0.2+0.9;
+		mite = new THREE.Mesh(new THREE.CylinderGeometry( 0, 0.125*scale, 0.75*scale, 32 ), wallMat);
+		mite.position.x = Math.random()*1-0.5;
+		mite.position.y = (2-0.75*scale)/2;
+		mite.position.z = Math.random()*1-0.5;
+		mite.rotation.x = Math.PI;
+		object.add(mite);
+
+		return object;
+	}
+
+	this.createWall = function(){
+		var wall = new THREE.Mesh(new THREE.BoxGeometry(2, 2, 2), wallMat);
+		return wall;
 	}
 
 	this.canMove = function(i, j){

@@ -5,7 +5,6 @@ var Actor = function(){
 Actor.prototype = {
 	model : new THREE.Object3D(),
 	state : 'still',
-	self : this,
 	health : 100,
 
 	forward : new THREE.Vector3(0, 0, -1),
@@ -21,6 +20,8 @@ Actor.prototype = {
 	prevEuler : new THREE.Euler(0, 0, 0, 'XYZ'),
 	targetRot : 0,
 	interpPercent : 0,
+	takeDamageSound : undefined,
+	dieSound : undefined,
 
 	init: function(){
 		this.createModel();
@@ -34,6 +35,23 @@ Actor.prototype = {
 
 	takeDamage : function(damage){
 		this.health -= damage || 10;
+		gameController.spawnExplosion(this.model.position);
+		var self = this;
+		if(this.takeDamageSound){
+			setTimeout(function(){
+				sounds.play(self.takeDamageSound);
+			}, 150);
+		}
+		this.takeDamageSelf();
+	},
+	takeDamageSelf: function(){},
+	die : function(){
+		var self = this;
+		if(this.dieSound){
+			setTimeout(function(){
+				sounds.play(self.dieSound);
+			}, 150);
+		}
 	},
 
 	setPosition: function(x, z){
@@ -89,6 +107,7 @@ Actor.prototype = {
 			if(this.state != 'dead'){
 				this.interpPercent = 0;
 				this.state = 'dead';
+				this.die();
 			}
 			this.dyingAction(dt);
 		}
@@ -214,13 +233,13 @@ Actor.prototype = {
 		var result = gameController.canMove(this.targetPos, this, forwards);
 		if(result == 'move'){
 			this.state = 'moving';
-			return true;
+			return result;
 		}
 		else if(result == 'blocked'){
 			target = target.clone().multiplyScalar(0.15);
 			this.targetPos = this.model.position.clone().add(target);
 			this.state = 'movingFail';
-			return false;
+			return result;
 		}
 		else if(result == 'attack'){
 			if(target.equals(this.forward)){
@@ -229,7 +248,7 @@ Actor.prototype = {
 			target = target.clone().multiplyScalar(0.15);
 			this.targetPos = this.model.position.clone().add(target);
 			this.state = 'attacking';
-			return false;
+			return result;
 		}
 	},
 

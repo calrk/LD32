@@ -7,6 +7,7 @@ var sceneHUD;
 var renderer;
 var gameController;
 var textures;
+var sounds;
 var loader;
 
 var clock;
@@ -21,7 +22,6 @@ function init(){
 	var canvas = document.getElementById('canvas');
 	renderer = new THREE.WebGLRenderer({antialias:true, canvas: canvas});
 	
-	// renderer.autoClear = false;
 	renderer.setSize(width, height);
 	renderer.setClearColor(0x888888, 0);
 	// renderer.shadowMapEnabled = true;
@@ -32,6 +32,7 @@ function init(){
 	clock.start();
 	
 	textures = new Textures();
+	sounds = new Sounds();
 
 	load();
 	console.log("Loading...");
@@ -49,7 +50,6 @@ function load(){
 	resize();
 	render();
 
-	gameController.start();
 }
 
 function render(){
@@ -60,7 +60,34 @@ function render(){
 	gameController.update(dt);
 
 	renderer.render(scene, gameController.player.camera);
-	// renderer.render(sceneHUD, gameController.player.camera2);
+}
+
+function startGame(){
+	$('#start').css({
+		display:'none',
+	});
+	// gameController.setGameState('playing');
+	gameController.start();
+}
+
+function restartGame(){
+	$('#start').css({
+		display:'block',
+	});
+	$('#end').css({
+		display:'none',
+	});
+	$('#lost').css({
+		display:'none',
+	});
+	gameController.reset();
+}
+
+function endGame(asd){
+	$('#'+asd).css({
+		display:'block',
+	});
+	// gameController.setGameState('playing');
 }
 
 window.onload = function(){

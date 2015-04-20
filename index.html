@@ -20,13 +20,9 @@
 	<link rel="stylesheet" type="text/css" href="./resources/style.css">
 
 	<!-- <link rel="icon" href="../favicon.png" type="image/png"/> -->
+	<link rel="icon" href="favicon.png" type="image/png"/>
 </head>
 <body>
-	<header>
-		<h1>
-			LD32<!--   - <span style='font-size:0.6em'>Spacebar to start</span> -->
-		</h1>
-	</header>
 
 	<div style='width:100%; height:100%;'>
 	</div>
@@ -35,8 +31,90 @@
 	<div id='scene'>
 		<canvas id='canvas'></canvas>
 		<div id='hud'>
-			<p>Health: <span id='healthHud'></span></p>
+			<div id='hudContent'>
+				<h2>Health: <span id='healthHud'></span>%</h2>
+				<h2>Insects Remaining: <span id='insectsHud'></span></h2>
+			</div>
 		</div>
 	</div>
+	<div id='start'>
+		<div class='menu'>
+			<h1>Giant Insects!</h1>
+			
+			<p>Giant Insects are taking over the world. You have been conscripted into travelling into their burrow to exterminate them, given the deadliest weapon known to insects, a newspaper.</p>
+
+			<p>Hunt around their burrow for them and walk into the insects to attack them.</p>
+
+			<hr>
+			<h3>Controls</h3>
+			<table>
+				<tr>
+					<td>W or up</td>
+					<td> - Moves forwards</td>
+				</tr>
+				<tr>
+					<td>S or down</td>
+					<td> - Moves backward</td>
+				</tr>
+				<tr>
+					<td>A or left</td>
+					<td> - Moves left</td>
+				</tr>
+				<tr>
+					<td>D or right</td>
+					<td> - Moves right</td>
+				</tr>
+				<tr>
+					<td>Q</td>
+					<td> - Rotates left</td>
+				</tr>
+				<tr>
+					<td>E</td>
+					<td> - Rotates right</td>
+				</tr>
+			</table>
+
+			<hr>
+			<input type='button' value='Start' onclick='startGame();'>
+			<hr>
+			<p>Created by Clark Lavery for Ludum Dare 32.</p>
+		</div>
+	</div>
+
+	<div id='end'>
+		<div class='menu'>
+			<h1>Giant Insects!</h1>
+			
+			<p>You have killed all the insects and saved the human race!</p>
+
+			<p>Thank you for playing!</p>
+
+			<hr>
+			<input type='button' value='Restart' onclick='restartGame();'>
+			<hr>
+			<p>Created by Clark Lavery for Ludum Dare 32.</p>
+		</div>
+	</div>
+
+	<div id='lost'>
+		<div class='menu'>
+			<h1>Giant Insects!</h1>
+			
+			<p>You have died to the insects, the last hope for humanity is lost and with it the human race...</p>
+
+			<p>Thank you for playing!</p>
+
+			<hr>
+			<input type='button' value='Restart' onclick='restartGame();'>
+			<hr>
+			<p>Created by Clark Lavery for Ludum Dare 32.</p>
+		</div>
+	</div>
+
+	<header>
+		<h1>
+			LD32  - <span style='font-size:0.8em'>Giant Insects</span>
+		</h1>
+	</header>
 </body>
 </html>

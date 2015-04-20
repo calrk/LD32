@@ -1,13 +1,16 @@
 Actor.Fly = function(params){
 	Actor.call(this, params);
-	this.lastMoveSuccess = true;
+	this.lastMoveSuccess = 'blocked';
 	this.prevHeight = 0;
+
+	this.takeDamageSound = 'fly_damage';
+	this.dieSound = 'fly_die';
 }
 
 Actor.Fly.prototype = Object.create(Actor.prototype);
 
 Actor.Fly.prototype.initSelf = function(){
-	this.idleTime = 1;
+	this.idleTime = 0.75;
 }
 
 Actor.Fly.prototype.resetSelf = function(){
@@ -201,16 +204,16 @@ Actor.Fly.prototype.stillAction = function(dt){
 		this.interpPercent = 0;
 	}
 	this.idleAnim();
-	if(this.lastMoveTime > 1){
-		var rand = Math.random()*6;
-		if(rand < 4 && this.lastMoveSuccess){
+	if(this.lastMoveTime > this.idleTime){
+		var rand = Math.random()*8;
+		if(rand < 6 && this.lastMoveSuccess != 'blocked'){
 			this.lastMoveSuccess = this.setMove(this.forward, 1);
 		}
-		else if(rand < 5){
+		else if(rand < 7){
 			this.setRotation(1);
 			this.lastMoveSuccess = true;
 		}
-		else if(rand < 6){
+		else if(rand < 8){
 			this.setRotation(-1);
 			this.lastMoveSuccess = true;
 		}

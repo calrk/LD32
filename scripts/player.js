@@ -9,7 +9,7 @@ Actor.Player = function(params){
 		down: keys.s,
 	};
 
-	this.camera = new THREE.PerspectiveCamera(75, width/height, 0.1, 100);
+	this.camera = new THREE.PerspectiveCamera(75, width/height, 0.1, 10);
 	this.light = new THREE.PointLight(0xffffff, 1, 10);
 	this.camera.add(this.light);
 }
@@ -36,6 +36,17 @@ Actor.Player.prototype.createModel = function(){
 	weaponJoint.add(weapon);
 }
 
+Actor.Player.prototype.takeDamageSelf = function(damage){
+	setTimeout(function(){
+		if(Math.random() < 0.5){
+			sounds.play('pain_1');
+		}
+		else{
+			sounds.play('pain_2');
+		}
+	}, 150);
+},
+
 Actor.Player.prototype.initSelf = function(){
 	// sceneHUD.add(this.model);
 	// sceneHUD.add(this.model2);
@@ -44,7 +55,7 @@ Actor.Player.prototype.initSelf = function(){
 Actor.Player.prototype.resetSelf = function(){
 	this.health = 100;
 	this.model.position.x = 2;
-	this.model.position.z = 4;
+	this.model.position.z = 2;
 	this.prevPos = this.model.position;
 	this.targetPos = this.model.position;
 
@@ -54,23 +65,43 @@ Actor.Player.prototype.resetSelf = function(){
 };
 
 Actor.Player.prototype.stillAction = function(dt){
-	if(keysDown[this.controls.left]){
-		this.setMove(this.right.clone().multiplyScalar(-1));
+	var result = false;
+	if(keysDown[this.controls.left] || keysDown[keys.left]){
+		result = this.setMove(this.right.clone().multiplyScalar(-1));
+		sounds.playFootstep();
 	}
-	if(keysDown[this.controls.right]){
-		this.setMove(this.right);
+	if(keysDown[this.controls.right] || keysDown[keys.right]){
+		result = this.setMove(this.right);
+		sounds.playFootstep();
 	}
-	if(keysDown[this.controls.up]){
-		this.setMove(this.forward);
+	if(keysDown[this.controls.up] || keysDown[keys.up]){
+		result = this.setMove(this.forward);
+		sounds.playFootstep();
 	}
-	if(keysDown[this.controls.down]){
-		this.setMove(this.forward.clone().multiplyScalar(-1));
+	if(keysDown[this.controls.down] || keysDown[keys.down]){
+		result = this.setMove(this.forward.clone().multiplyScalar(-1));
+		sounds.playFootstep();
 	}
 	if(keysDown[this.controls.rotateLeft]){
 		this.setRotation(1);
+		sounds.playFootstep();
 	}
 	if(keysDown[this.controls.rotateRight]){
 		this.setRotation(-1);
+		sounds.playFootstep();
+	}
+	if(result == 'move'){
+		/*setTimeout(function(){
+			sounds.playFootstep();
+		}, 250);*/
+	}
+	else if(result == 'attack'){
+		sounds.play('swing');
+	}
+	else if(result == 'blocked'){
+		setTimeout(function(){
+			sounds.play('thud');
+		}, 150);
 	}
 };
 

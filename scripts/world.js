@@ -39,7 +39,8 @@ function World(params){
 		size: 0.1,
 		map: textures.getTexture('dust'),
 		blending: THREE.AdditiveBlending,
-		transparent: true});
+		transparent: true
+	});
 
 	this.reset = function(){
 		content = [];
@@ -75,7 +76,7 @@ function World(params){
 		//add outside walls
 		for(var i = 0; i < params.width+2; i++){
 			for(var j = 0; j < params.length+2; j++){
-				if(i == 0 || i == params.width || j == 0 || j == params.length+1){
+				if(i == 0 || i == params.width+1 || j == 0 || j == params.length+1){
 					var wall = new THREE.Mesh(new THREE.BoxGeometry(2, 2, 2), wallMat);
 					wall.position.x = 2*i;
 					wall.position.z = 2*j;
@@ -94,7 +95,18 @@ function World(params){
 				var x = Math.floor(Math.random()*2);
 				var y = Math.floor(Math.random()*2);
 
-				var wall = new THREE.Mesh(new THREE.BoxGeometry(2, 2, 2), wallMat);
+				var type = Math.floor(Math.random()*3);
+				var wall;
+				if(type == 0){
+					wall = this.createStalagtite();
+				}
+				else if(type == 1){
+					wall = this.createStalagmite();
+				}
+				else{
+					wall = this.createWall();
+				}
+				// var wall = new THREE.Mesh(new THREE.BoxGeometry(2, 2, 2), wallMat);
 				wall.position.x = 2*(i + x);
 				wall.position.z = 2*(j + y);
 				world.add(wall);
@@ -112,6 +124,94 @@ function World(params){
 			dustSystems[j].offset = Math.random()*Math.PI*2;
 			world.add(dustSystems[j]);
 		}
+	}
+
+	this.createStalagmite = function(){
+		var mergeGeometry = new THREE.Geometry();
+		var scale = Math.random()*0.4+0.8;
+
+		var mite = new THREE.Mesh(new THREE.CylinderGeometry( 0, 0.25*scale, 1.5*scale, 32 ), wallMat);
+		mite.position.x = Math.random()*1.5-0.75;
+		mite.position.y = -(2-1.5*scale)/2;
+		mite.position.z = Math.random()*1.5-0.75;
+		mite.matrixAutoUpdate && mite.updateMatrix();
+		matrix = mite.matrix;
+		mergeGeometry.merge(mite.geometry, matrix);
+
+		scale = Math.random()*0.2+0.9;
+		mite = new THREE.Mesh(new THREE.CylinderGeometry( 0, 0.25*scale, 1.5*scale, 32 ), wallMat);
+		mite.position.x = Math.random()*1.5-0.75;
+		mite.position.y = -(2-1.5*scale)/2;
+		mite.position.z = Math.random()*1.5-0.75;
+		mite.matrixAutoUpdate && mite.updateMatrix();
+		matrix = mite.matrix;
+		mergeGeometry.merge(mite.geometry, matrix);
+
+		scale = Math.random()*0.2+0.9;
+		mite = new THREE.Mesh(new THREE.CylinderGeometry( 0, 0.125*scale, 0.5*scale, 32 ), wallMat);
+		mite.position.x = Math.random()*1.5-0.75;
+		mite.position.y = -(2-0.5*scale)/2;
+		mite.position.z = Math.random()*1.5-0.75;
+		mite.matrixAutoUpdate && mite.updateMatrix();
+		matrix = mite.matrix;
+		mergeGeometry.merge(mite.geometry, matrix);
+
+		scale = Math.random()*0.2+0.9;
+		mite = new THREE.Mesh(new THREE.CylinderGeometry( 0, 0.125*scale, 0.5*scale, 32 ), wallMat);
+		mite.position.x = Math.random()*1.5-0.75;
+		mite.position.y = -(2-0.5*scale)/2;
+		mite.position.z = Math.random()*1.5-0.75;
+		mite.matrixAutoUpdate && mite.updateMatrix();
+		matrix = mite.matrix;
+		mergeGeometry.merge(mite.geometry, matrix);
+
+		mite = new THREE.Mesh(new THREE.CylinderGeometry( 0, 0.125*scale, 0.25*scale, 32 ), wallMat);
+		mite.position.x = Math.random()*1.5-0.75;
+		mite.position.y = -(2-0.25*scale)/2;
+		mite.position.z = Math.random()*1.5-0.75;
+		mite.matrixAutoUpdate && mite.updateMatrix();
+		matrix = mite.matrix;
+		mergeGeometry.merge(mite.geometry, matrix);
+
+		mite = new THREE.Mesh(new THREE.SphereGeometry( 1, 16, 16 ), wallMat);
+		mite.position.x = Math.random()*0.5-0.25;
+		mite.position.y = -1.75;
+		mite.position.z = Math.random()*0.5-0.25;
+		mite.matrixAutoUpdate && mite.updateMatrix();
+		matrix = mite.matrix;
+		mergeGeometry.merge(mite.geometry, matrix);
+
+		object = new THREE.Mesh(mergeGeometry, wallMat);
+		object.rotation.y = Math.PI*Math.random()*2;
+		return object;
+	}
+
+	this.createStalagtite = function(){
+		var object = this.createStalagmite();
+		object.rotation.x = Math.PI;
+
+		var scale = Math.random()*0.2+0.9;
+		var mite = new THREE.Mesh(new THREE.CylinderGeometry( 0, 0.125*scale, 0.5*scale, 32 ), wallMat);
+		mite.position.x = Math.random()*1-0.5;
+		mite.position.y = (2-0.5*scale)/2;
+		mite.position.z = Math.random()*1-0.5;
+		mite.rotation.x = Math.PI;
+		object.add(mite);
+
+		scale = Math.random()*0.2+0.9;
+		mite = new THREE.Mesh(new THREE.CylinderGeometry( 0, 0.125*scale, 0.75*scale, 32 ), wallMat);
+		mite.position.x = Math.random()*1-0.5;
+		mite.position.y = (2-0.75*scale)/2;
+		mite.position.z = Math.random()*1-0.5;
+		mite.rotation.x = Math.PI;
+		object.add(mite);
+
+		return object;
+	}
+
+	this.createWall = function(){
+		var wall = new THREE.Mesh(new THREE.BoxGeometry(2, 2, 2), wallMat);
+		return wall;
 	}
 
 	this.canMove = function(i, j){

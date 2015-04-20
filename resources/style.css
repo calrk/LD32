@@ -28,6 +28,15 @@ header h1{
 	background-repeat: no-repeat;
 }
 
+hr{
+	margin-top: 10px;
+	margin-bottom: 10px;
+	border-color: black;
+}
+p{
+	margin: 10px;
+}
+
 .headerPadding{
 	height:70px;
 	width:100%;
@@ -42,9 +51,50 @@ header h1{
 	position:fixed;
 	left:0;
 }
-#hud{
+#start{
 	position:fixed;
-	left:0;
+	top: 70;
+	bottom: 0;
+	left: 0;
+	right: 0;
+	padding: 10px;
+	/*background-color: gray;*/
+}
+#end, #hud, #lost{
+	position:fixed;
+	top: 70;
+	bottom: 0;
+	left: 0;
+	right: 0;
+	padding: 10px;
+	background-color: rgba(82, 48, 0, 0.125);
+	display:none;
+}
+#hud{
+	background-color: transparent;
+}
+
+.menu{
+	position: relative;
+	width: 70%;
+	margin: 10% 15%;
+	padding: 10px;
+	background-color: #523000;
+}
+
+#hudContent{
+	position: relative;
+	max-width: 300px;
+	padding: 10px;
+	background-color: #523000;
+}
+
+input[type='button']{
+	font-size: 24px;
+}
+
+table{
+	padding: 10px;
 }
 
 canvas{

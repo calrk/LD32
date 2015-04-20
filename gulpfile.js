@@ -2,8 +2,8 @@ var gulp = require('gulp');
 var concat = require('gulp-concat');
 var uglify = require('gulp-uglify');
 var connect = require('gulp-connect');
-// var s3 = require('gulp-s3');
-// var fs = require('fs');
+var s3 = require('gulp-s3');
+var fs = require('fs');
 
 var paths = {
 	js : ['./scripts/*.js']
@@ -34,9 +34,9 @@ gulp.task('watch', function () {
 	gulp.watch(paths.js, ['js']);
 });
 
-/*gulp.task('aws', function(){
+gulp.task('aws', function(){
 	aws = JSON.parse(fs.readFileSync('./aws.json'));
 
 	gulp.src('./examples/**')
 		.pipe(s3(aws));
-});*/
+});
