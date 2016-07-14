@@ -2,25 +2,32 @@
 function Loader(params){
 	var models = {};
 	var images = {};
-	var jsonloader = new THREE.JSONLoader();
+	var objectloader = new THREE.ObjectLoader();
 	var loadingCount = 0;
 	var loadedCount = 0;
 
-	// jsonloader.load("models/test.js", modelToScene);
+	// objectloader.load("models/test.js", modelToScene);
 
 	loadImage('dust', true);
+	loadImage('firefly', true);
 	loadImage('blood', true);
 	loadImage('newspaper', true);
+	loadImage('fire', true);
+
+	loadModel('torch');
 
 	function loadModel(name){
 		loadingCount ++;
 		//load a model and add it to the model object
-		jsonloader.load('../models/' + name, function(geometry, materials){
+		objectloader.load('../models/' + name + '.json', function(object){
 			loadedCount ++;
-			var mat = new THREE.MeshLambertMaterial({color:0xffffff});
-			geometry.computeTangents();
-			models[name] = new THREE.Mesh(geometry, mat);
+			// var material = new THREE.MultiMaterial( materials );
+			models[name] = object;
 			// models[name].rotation.x = Math.PI/2;
+		}, function(){//progress
+
+		}, function(){//error
+			loadedCount ++;
 		});
 	}
 

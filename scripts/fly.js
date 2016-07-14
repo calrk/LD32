@@ -5,6 +5,7 @@ Actor.Fly = function(params){
 
 	this.takeDamageSound = 'fly_damage';
 	this.dieSound = 'fly_die';
+	this.hierarchy = {};
 }
 
 Actor.Fly.prototype = Object.create(Actor.prototype);
@@ -29,13 +30,13 @@ Actor.Fly.prototype.resetSelf = function(){
 			joint.rotation.x = -Math.PI/6;
 		}
 	});
-	this.model.getObjectByName('leg1').rotation.z = 0;
-	this.model.getObjectByName('leg2').rotation.z = 0;
-	this.model.getObjectByName('leg3').rotation.z = 0;
-	this.model.getObjectByName('leg4').rotation.z = 0;
-	this.model.getObjectByName('leg5').rotation.z = 0;
-	this.model.getObjectByName('leg6').rotation.z = 0;
-	this.model.getObjectByName('neck').rotation.x = -Math.PI/6;
+	this.hierarchy.leg1.rotation.z = 0;
+	this.hierarchy.leg2.rotation.z = 0;
+	this.hierarchy.leg3.rotation.z = 0;
+	this.hierarchy.leg4.rotation.z = 0;
+	this.hierarchy.leg5.rotation.z = 0;
+	this.hierarchy.leg6.rotation.z = 0;
+	this.hierarchy.neck.rotation.x = -Math.PI/6;
 	this.model.rotation.y = 0;
 	this.model.getObjectByName('model').rotation.x = Math.PI/6;
 }
@@ -79,13 +80,16 @@ Actor.Fly.prototype.createModel = function(){
 
 	var neck = this.createJoint(0);
 	neck.name = 'neck';
+	this.hierarchy.neck = neck;
 	neck.position.z = -1;
 	neck.rotation.x = -Math.PI/6;
 	this.model.add(neck);
 
-	var head = this.createDiamond([0.5, 0.5, 0.5], this.flyMat);
-	head.position.y = -0.25;
+	var head = this.createJoint(0);
+	var headMesh = this.createDiamond([0.5, 0.5, 0.5], this.flyMat);
+	head.position.z = -0.25;
 	neck.add(head);
+	head.add(headMesh);
 
 	var eye1 = new THREE.Mesh(new THREE.SphereGeometry(0.2, 16, 16), this.eyeMat);
 	eye1.position.x = -0.2;
@@ -107,6 +111,7 @@ Actor.Fly.prototype.createModel = function(){
 
 	var abo = this.createJoint(0);
 	abo.name = 'abdomen';
+	this.hierarchy.abdomen = abo;
 	abo.position.y = 0.25;
 	abo.position.z = 0.15;
 	abo.rotation.x = Math.PI/5;
@@ -119,6 +124,7 @@ Actor.Fly.prototype.createModel = function(){
 
 	var wing1 = this.createJoint(0);
 	wing1.name = 'wing1';
+	this.hierarchy.wing1 = wing1;
 	wing1.position.z = -0.5;
 	wing1.position.x = -0.25;
 	wing1.position.y = 0.25;
@@ -127,12 +133,13 @@ Actor.Fly.prototype.createModel = function(){
 	wing1.rotation.z = Math.PI/12;
 	this.model.add(wing1);
 
-	var wing1_1 = this.createWing(this.blackMat);
+	var wing1_1 = this.createWing();
 	wing1_1.position.z = 0.5;
 	wing1.add(wing1_1);
 
 	var wing2 = this.createJoint(0);
 	wing2.name = 'wing2';
+	this.hierarchy.wing2 = wing2;
 	wing2.position.z = -0.5;
 	wing2.position.x = 0.25;
 	wing2.position.y = 0.25;
@@ -141,7 +148,7 @@ Actor.Fly.prototype.createModel = function(){
 	wing2.rotation.z = -Math.PI/12;
 	this.model.add(wing2);
 
-	var wing2_1 = this.createWing(this.blackMat);
+	var wing2_1 = this.createWing();
 	wing2_1.position.z = 0.5;
 	wing2.add(wing2_1);
 
@@ -149,12 +156,14 @@ Actor.Fly.prototype.createModel = function(){
 
 	var leg1 = this.createLeg();
 	leg1.name = 'leg1';
+	this.hierarchy.leg1 = leg1;
 	leg1.position.x = -0.5;
 	leg1.position.z = -0.5;
 	this.model.add(leg1);
 
 	var leg2 = this.createLeg();
 	leg2.name = 'leg2';
+	this.hierarchy.leg2 = leg2;
 	leg2.position.x = -0.5;
 	leg2.position.z = 0;
 	leg2.rotation.z = Math.PI/12;
@@ -162,6 +171,7 @@ Actor.Fly.prototype.createModel = function(){
 
 	var leg3 = this.createLeg();
 	leg3.name = 'leg3';
+	this.hierarchy.leg3 = leg3;
 	leg3.position.x = -0.5;
 	leg3.position.z = 0.5;
 	leg3.rotation.z = Math.PI/8;
@@ -169,6 +179,7 @@ Actor.Fly.prototype.createModel = function(){
 
 	var leg4 = this.createLeg(true);
 	leg4.name = 'leg4';
+	this.hierarchy.leg4 = leg4;
 	leg4.position.x = 0.5;
 	leg4.position.z = -0.5;
 	leg4.rotation.y = Math.PI;
@@ -176,6 +187,7 @@ Actor.Fly.prototype.createModel = function(){
 
 	var leg5 = this.createLeg(true);
 	leg5.name = 'leg5';
+	this.hierarchy.leg5 = leg5;
 	leg5.position.x = 0.5;
 	leg5.position.z = 0;
 	leg5.rotation.y = Math.PI;
@@ -184,6 +196,7 @@ Actor.Fly.prototype.createModel = function(){
 
 	var leg6 = this.createLeg(true);
 	leg6.name = 'leg6';
+	this.hierarchy.leg6 = leg6;
 	leg6.position.x = 0.5;
 	leg6.position.z = 0.5;
 	leg6.rotation.y = Math.PI;
@@ -192,6 +205,7 @@ Actor.Fly.prototype.createModel = function(){
 
 	var asd = new THREE.Object3D();
 	this.model.name = 'model';
+	this.hierarchy.model = this.model;
 	asd.add(this.model);
 	this.model = asd;
 	// this.model = this.createBody();
@@ -287,7 +301,7 @@ Actor.Fly.prototype.createLeg = function(rotate){
 
 Actor.Fly.prototype.createWing = function(mat){
 	var geo = new THREE.Geometry();
-	var mat = mat || new THREE.MeshLambertMaterial({color: 0x800000});
+	var mat = mat || new THREE.MeshLambertMaterial({color: 0x000000, transparent: true, opacity: 0.5});
 
 	geo.vertices.push(new THREE.Vector3(0.75, 0, 0.75));
 	geo.vertices.push(new THREE.Vector3(-0.75, 0, 0.75));
@@ -348,16 +362,14 @@ Actor.Fly.prototype.createBody = function(){
 	geo.faces.push(new THREE.Face3(0, 3, 2));
 	geo.faces.push(new THREE.Face3(0, 4, 3));
 
-	geo.faces.push(new THREE.Face3(1, 2, 5));
-	geo.faces.push(new THREE.Face3(5, 2, 6));
-	geo.faces.push(new THREE.Face3(2, 3, 6));
-	geo.faces.push(new THREE.Face3(6, 3, 7));
-
-	geo.faces.push(new THREE.Face3(3, 4, 7));
-	geo.faces.push(new THREE.Face3(7, 4, 8));
-	geo.faces.push(new THREE.Face3(4, 1, 8));
-	geo.faces.push(new THREE.Face3(8, 1, 5));
-
+	geo.faces.push(new THREE.Face3(1, 2, 6));
+	geo.faces.push(new THREE.Face3(1, 6, 5));
+	geo.faces.push(new THREE.Face3(2, 3, 7));
+	geo.faces.push(new THREE.Face3(2, 7, 6));
+	geo.faces.push(new THREE.Face3(3, 4, 8));
+	geo.faces.push(new THREE.Face3(3, 8, 7));
+	geo.faces.push(new THREE.Face3(4, 1, 5));
+	geo.faces.push(new THREE.Face3(4, 5, 8));
 
 	geo.faces.push(new THREE.Face3(8, 5, 9));
 	geo.faces.push(new THREE.Face3(5, 6, 9));
@@ -370,26 +382,27 @@ Actor.Fly.prototype.createBody = function(){
 	var uvb = new THREE.Vector2(0, 1);
 	var uvc = new THREE.Vector2(1, 1);
 	var uvd = new THREE.Vector2(1, 0);
+	var uve = new THREE.Vector2(0.5, 0.5);
 
-	geo.faceVertexUvs[ 0 ].push( [ uvb, uva, uvd ] );
-	geo.faceVertexUvs[ 0 ].push( [ uvb, uva, uvd ] );
-	geo.faceVertexUvs[ 0 ].push( [ uvb, uva, uvd ] );//under
-	geo.faceVertexUvs[ 0 ].push( [ uvb, uva, uvd ] );//under
+	geo.faceVertexUvs[ 0 ].push( [ uve, uva, uvb ] );
+	geo.faceVertexUvs[ 0 ].push( [ uve, uvb, uva ] );
+	geo.faceVertexUvs[ 0 ].push( [ uve, uva, uvb ] );
+	geo.faceVertexUvs[ 0 ].push( [ uve, uvb, uva ] );
 
+	geo.faceVertexUvs[ 0 ].push( [ uva, uvb, uvc ] );
+	geo.faceVertexUvs[ 0 ].push( [ uva, uvc, uvd ] );
 	geo.faceVertexUvs[ 0 ].push( [ uvb, uva, uvd ] );
-	geo.faceVertexUvs[ 0 ].push( [ uvb, uva, uvd ] );
-	geo.faceVertexUvs[ 0 ].push( [ uvb, uva, uvd ] );//under
-	geo.faceVertexUvs[ 0 ].push( [ uvb, uva, uvd ] );//under
+	geo.faceVertexUvs[ 0 ].push( [ uvb, uvd, uvc ] );
 
+	geo.faceVertexUvs[ 0 ].push( [ uva, uvb, uvc ] );
+	geo.faceVertexUvs[ 0 ].push( [ uva, uvc, uvd ] );
 	geo.faceVertexUvs[ 0 ].push( [ uvb, uva, uvd ] );
-	geo.faceVertexUvs[ 0 ].push( [ uvb, uva, uvd ] );
-	geo.faceVertexUvs[ 0 ].push( [ uvb, uva, uvd ] );//under
-	geo.faceVertexUvs[ 0 ].push( [ uvb, uva, uvd ] );//under
+	geo.faceVertexUvs[ 0 ].push( [ uvb, uvd, uvc ] );
 
-	geo.faceVertexUvs[ 0 ].push( [ uva, uvd, uvb ] );
-	geo.faceVertexUvs[ 0 ].push( [ uva, uvd, uvb ] );
-	geo.faceVertexUvs[ 0 ].push( [ uva, uvd, uvb ] );//under
-	geo.faceVertexUvs[ 0 ].push( [ uva, uvd, uvb ] );//under
+	geo.faceVertexUvs[ 0 ].push( [ uvc, uvd, uve ] );
+	geo.faceVertexUvs[ 0 ].push( [ uvd, uvc, uve ] );
+	geo.faceVertexUvs[ 0 ].push( [ uvc, uvd, uve ] );
+	geo.faceVertexUvs[ 0 ].push( [ uvd, uvc, uve ] );
 
 	var mesh = new THREE.Mesh(geo, this.flyMat);
 	mesh.rotation.x = Math.PI/2;
@@ -400,39 +413,39 @@ Actor.Fly.prototype.createBody = function(){
 }
 
 Actor.Fly.prototype.idleAnim = function(){
-	this.model.getObjectByName('neck').rotation.z = this.interpolator([0, 0.3, 0.4, 0.5, 0.6, 1], [0, 0, -0.1, 0.1, 0, 0], this.interpPercent);
-	this.model.getObjectByName('abdomen').rotation.x = Math.PI/5 + this.interpolator([0, 0.4, 0.6, 0.8, 1], [0, 0, -0.05, 0, 0], this.interpPercent);
+	this.hierarchy.neck.rotation.z = this.interpolator([0, 0.3, 0.4, 0.5, 0.6, 1], [0, 0, -0.1, 0.1, 0, 0], this.interpPercent);
+	this.hierarchy.abdomen.rotation.x = Math.PI/5 + this.interpolator([0, 0.4, 0.6, 0.8, 1], [0, 0, -0.05, 0, 0], this.interpPercent);
 
-	this.model.getObjectByName('leg1').rotation.z =              this.interpolator([0, 0.2, 0.3, 0.4, 1], [0, 0, 0.1, 0, 0], this.interpPercent);
-	this.model.getObjectByName('leg2').rotation.z = Math.PI/12 + this.interpolator([0, 0.4, 0.5, 0.6, 1], [0, 0, 0.1, 0, 0], this.interpPercent);
-	this.model.getObjectByName('leg3').rotation.z = Math.PI/8 +  this.interpolator([0, 0.6, 0.7, 0.8, 1], [0, 0, 0.1, 0, 0], this.interpPercent);
+	this.hierarchy.leg1.rotation.z =              this.interpolator([0, 0.2, 0.3, 0.4, 1], [0, 0, 0.1, 0, 0], this.interpPercent);
+	this.hierarchy.leg2.rotation.z = Math.PI/12 + this.interpolator([0, 0.4, 0.5, 0.6, 1], [0, 0, 0.1, 0, 0], this.interpPercent);
+	this.hierarchy.leg3.rotation.z = Math.PI/8 +  this.interpolator([0, 0.6, 0.7, 0.8, 1], [0, 0, 0.1, 0, 0], this.interpPercent);
 
-	this.model.getObjectByName('leg4').rotation.z =              this.interpolator([0, 0.2, 0.3, 0.4, 1], [0, 0, 0.1, 0, 0], this.interpPercent);
-	this.model.getObjectByName('leg5').rotation.z = Math.PI/12 + this.interpolator([0, 0.4, 0.5, 0.6, 1], [0, 0, 0.1, 0, 0], this.interpPercent);
-	this.model.getObjectByName('leg6').rotation.z = Math.PI/8 +  this.interpolator([0, 0.6, 0.7, 0.8, 1], [0, 0, 0.1, 0, 0], this.interpPercent);
+	this.hierarchy.leg4.rotation.z = this.hierarchy.leg1.rotation.z;
+	this.hierarchy.leg5.rotation.z = this.hierarchy.leg2.rotation.z;
+	this.hierarchy.leg6.rotation.z = this.hierarchy.leg3.rotation.z;
 }
 
 Actor.Fly.prototype.attackAnim = function(){
-	this.model.getObjectByName('model').rotation.x = Math.PI/6 + this.interpolator([0, 0.2, 0.6, 1], [0, -0.15, 0.25, 0], this.interpPercent);
-	this.model.getObjectByName('model').position.z = this.interpolator([0, 0.2, 0.6, 1], [0, -0.25, -0.75, 0], this.interpPercent);
+	this.hierarchy.model.rotation.x = Math.PI/6 + this.interpolator([0, 0.2, 0.6, 1], [0, -0.15, 0.25, 0], this.interpPercent);
+	this.hierarchy.model.position.z = this.interpolator([0, 0.2, 0.6, 1], [0, -0.25, -0.75, 0], this.interpPercent);
 		
-	this.model.getObjectByName('leg1').rotation.z =              this.interpolator([0, 0.2, 0.4, 0.6, 1], [0, -0.2, 0.5, 0, 0], this.interpPercent);
-	this.model.getObjectByName('leg2').rotation.z = Math.PI/12 + this.interpolator([0, 0.3, 0.5, 0.7, 1], [0, -0.2, 0.5, 0, 0], this.interpPercent);
-	this.model.getObjectByName('leg3').rotation.z = Math.PI/8 +  this.interpolator([0, 0.4, 0.6, 0.8, 1], [0, -0.2, 0.5, 0, 0], this.interpPercent);
+	this.hierarchy.leg1.rotation.z =              this.interpolator([0, 0.2, 0.4, 0.6, 1], [0, -0.2, 0.5, 0, 0], this.interpPercent);
+	this.hierarchy.leg2.rotation.z = Math.PI/12 + this.interpolator([0, 0.3, 0.5, 0.7, 1], [0, -0.2, 0.5, 0, 0], this.interpPercent);
+	this.hierarchy.leg3.rotation.z = Math.PI/8 +  this.interpolator([0, 0.4, 0.6, 0.8, 1], [0, -0.2, 0.5, 0, 0], this.interpPercent);
 
-	this.model.getObjectByName('leg4').rotation.z =              this.interpolator([0, 0.2, 0.4, 0.6, 1], [0, -0.2, 0.5, 0, 0], this.interpPercent);
-	this.model.getObjectByName('leg5').rotation.z = Math.PI/12 + this.interpolator([0, 0.3, 0.5, 0.7, 1], [0, -0.2, 0.5, 0, 0], this.interpPercent);
-	this.model.getObjectByName('leg6').rotation.z = Math.PI/8 +  this.interpolator([0, 0.4, 0.6, 0.8, 1], [0, -0.2, 0.5, 0, 0], this.interpPercent);
+	this.hierarchy.leg4.rotation.z = this.hierarchy.leg1.rotation.z;
+	this.hierarchy.leg5.rotation.z = this.hierarchy.leg2.rotation.z;
+	this.hierarchy.leg6.rotation.z = this.hierarchy.leg3.rotation.z;
 }
 
 Actor.Fly.prototype.dieAnim = function(){
-	this.model.getObjectByName('model').rotation.x = this.interpolator([0, 0.5, 1], [Math.PI/6, Math.PI, Math.PI], this.interpPercent);
-	this.model.getObjectByName('leg1').rotation.z = this.interpolator([0, 1], [0, 0.2], this.interpPercent);
-	this.model.getObjectByName('leg2').rotation.z = this.interpolator([0, 1], [0, 0.2], this.interpPercent);
-	this.model.getObjectByName('leg3').rotation.z = this.interpolator([0, 1], [0, 0.2], this.interpPercent);
-	this.model.getObjectByName('leg4').rotation.z = this.interpolator([0, 1], [0, 0.2], this.interpPercent);
-	this.model.getObjectByName('leg5').rotation.z = this.interpolator([0, 1], [0, 0.2], this.interpPercent);
-	this.model.getObjectByName('leg6').rotation.z = this.interpolator([0, 1], [0, 0.2], this.interpPercent);
+	this.hierarchy.model.rotation.x = this.interpolator([0, 0.5, 1], [Math.PI/6, Math.PI, Math.PI], this.interpPercent);
+	this.hierarchy.leg1.rotation.z = this.interpolator([0, 1], [0, 0.2], this.interpPercent);
+	this.hierarchy.leg2.rotation.z = this.hierarchy.leg1.rotation.z;
+	this.hierarchy.leg3.rotation.z = this.hierarchy.leg1.rotation.z;
+	this.hierarchy.leg4.rotation.z = this.hierarchy.leg1.rotation.z;
+	this.hierarchy.leg5.rotation.z = this.hierarchy.leg1.rotation.z;
+	this.hierarchy.leg6.rotation.z = this.hierarchy.leg1.rotation.z;
 
 	var self = this;
 	this.model.traverse(function(joint){
@@ -447,11 +460,11 @@ Actor.Fly.prototype.dieAnim = function(){
 		}
 	});
 
-	this.model.getObjectByName('neck').rotation.x = this.interpolator([0, 1], [-Math.PI/6, 0], this.interpPercent);
-	this.model.getObjectByName('abdomen').rotation.x = Math.PI/5 + this.interpolator([0, 1], [0, -0.15], this.interpPercent);
+	this.hierarchy.neck.rotation.x = this.interpolator([0, 1], [-Math.PI/6, 0], this.interpPercent);
+	this.hierarchy.abdomen.rotation.x = Math.PI/5 + this.interpolator([0, 1], [0, -0.15], this.interpPercent);
 	
-	this.model.getObjectByName('wing1').rotation.x = -Math.PI/6 + this.interpolator([0, 1], [0, Math.PI/6], this.interpPercent);
-	this.model.getObjectByName('wing2').rotation.x = -Math.PI/6 + this.interpolator([0, 1], [0, Math.PI/6], this.interpPercent);
+	this.hierarchy.wing1.rotation.x = -Math.PI/6 + this.interpolator([0, 1], [0, Math.PI/6], this.interpPercent);
+	this.hierarchy.wing2.rotation.x = -Math.PI/6 + this.interpolator([0, 1], [0, Math.PI/6], this.interpPercent);
 
 	this.model.position.y = this.interpolator([0, 0.5, 1], [this.prevHeight, -0.85, -0.85], this.interpPercent);
 	this.model.rotation.y = this.model.rotation.y += 0.005;

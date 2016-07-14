@@ -17,7 +17,7 @@ function Textures(params){
 		var frame = CLARITY.ctx.createImageData(canvas.width, canvas.height);
 		
 		var cloud = new CLARITY.Cloud({red:255, green:255, blue:255}).process(frame);
-		cloud = new CLARITY.Blur({}).process(cloud);
+		// cloud = new CLARITY.Blur({}).process(cloud);
 		var icloud = new CLARITY.Invert({}).process(cloud);
 		generateTexture('cloud', cloud);
 		generateTexture('wall', cloud);
@@ -27,8 +27,8 @@ function Textures(params){
 		generateTexture('wallNorm', cloudNorm);
 
 		var noiseNorm = new CLARITY.FillRGB({red: 128, green: 128, blue: 255}).process(frame);
-		noiseNorm = new CLARITY.Noise({intensity:30, monochromatic: false}).process(noiseNorm);
-		noiseNorm = new CLARITY.Blur({radius:2}).process(noiseNorm);
+		// noiseNorm = new CLARITY.Noise({intensity:30, monochromatic: false}).process(noiseNorm);
+		// noiseNorm = new CLARITY.Blur({radius:2}).process(noiseNorm);
 		generateTexture('noiseNorm', noiseNorm);
 		generateTexture('dirtCeilNorm', noiseNorm);
 

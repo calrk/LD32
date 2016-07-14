@@ -10,7 +10,7 @@ function Hud(params){
 	}
 
 	this.show = function(){
-		$('#hud').show();
+		// $('#hud').show();
 	}
 
 	this.hide = function(){

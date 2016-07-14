@@ -22,6 +22,9 @@ document.addEventListener('keydown', function(event) {
 	if(event.keyCode == 90){
 		$('canvas').toggleClass('hided');
 	}
+	else if(event.keyCode == 32){
+		requestFullScreen.call(document.documentElement);
+	}
 });
 
 document.addEventListener('keyup', function(event) {

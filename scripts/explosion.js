@@ -8,7 +8,7 @@ function Explosion(parameters){
 
 	var unique = Math.random();
 
-	var bloodMaterial = new THREE.PointCloudMaterial({
+	var bloodMaterial = new THREE.PointsMaterial({
 		color: 0xFF0000, 
 		size: 0.1,
 		map: textures.getTexture('blood'),
@@ -23,7 +23,7 @@ function Explosion(parameters){
 			particle.vertices.push(new THREE.Vector3(Math.random()*0.5-0.25, Math.random()*0.5-0.25, Math.random()*0.5-0.25));
 		}
 
-		pointCloud = new THREE.PointCloud(particle, bloodMaterial);
+		pointCloud = new THREE.Points(particle, bloodMaterial);
 		// pointCloud.sortParticles = true;
 		pointCloud.position.copy(position);
 		scene.add(pointCloud);

@@ -89,6 +89,7 @@ function GameController(){
 
 	this.update = function(dt){
 		// hud.updateText(gameState);
+		world.update(dt);
 		switch(gameState){
 			case "setup":
 				break;
@@ -100,8 +101,6 @@ function GameController(){
 					sounds.playAtmospheric();
 					atmosCooldown = 0 - Math.random()*2;
 				}
-
-				world.update(dt);
 
 				for(var i = 0; i < this.enemies.length; i++){
 					this.enemies[i].update(dt);
@@ -122,7 +121,6 @@ function GameController(){
 					endGame('lost');
 					hud.hide();
 				}
-
 				break;
 			case "over":
 			case "lost":

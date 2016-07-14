@@ -277,39 +277,49 @@ Actor.prototype = {
 	},
 
 	createJoint: function(length){
-		var geometry = new THREE.Geometry();
-		geometry.vertices.push(new THREE.Vector3(0, 0, 0));
-		geometry.vertices.push(new THREE.Vector3(length, 0, 0));
-		geometry.vertices.push(new THREE.Vector3(0, 0, 0));
-		geometry.vertices.push(new THREE.Vector3(0, length, 0));
-		geometry.vertices.push(new THREE.Vector3(0, 0, 0));
-		geometry.vertices.push(new THREE.Vector3(0, 0, length));
-		geometry.colors.push(new THREE.Color(0xff0000));
-		geometry.colors.push(new THREE.Color(0xff0000));
-		geometry.colors.push(new THREE.Color(0x00ff00));
-		geometry.colors.push(new THREE.Color(0x00ff00));
-		geometry.colors.push(new THREE.Color(0x0000ff));
-		geometry.colors.push(new THREE.Color(0x0000ff));
+		if(length == 0){
+			return new THREE.Object3D();
+		}
+		else{
+			var geometry = new THREE.Geometry();
+			geometry.vertices.push(new THREE.Vector3(0, 0, 0));
+			geometry.vertices.push(new THREE.Vector3(length, 0, 0));
+			geometry.vertices.push(new THREE.Vector3(0, 0, 0));
+			geometry.vertices.push(new THREE.Vector3(0, length, 0));
+			geometry.vertices.push(new THREE.Vector3(0, 0, 0));
+			geometry.vertices.push(new THREE.Vector3(0, 0, length));
+			geometry.colors.push(new THREE.Color(0xff0000));
+			geometry.colors.push(new THREE.Color(0xff0000));
+			geometry.colors.push(new THREE.Color(0x00ff00));
+			geometry.colors.push(new THREE.Color(0x00ff00));
+			geometry.colors.push(new THREE.Color(0x0000ff));
+			geometry.colors.push(new THREE.Color(0x0000ff));
 
-		var material = new THREE.LineBasicMaterial();
-		material.vertexColors = THREE.VertexColors;
+			var material = new THREE.LineBasicMaterial();
+			material.vertexColors = THREE.VertexColors;
 
-		var axes = new THREE.Line(geometry, material, THREE.LinePieces);
-		axes.name = "axes";
+			var axes = new THREE.Line(geometry, material, THREE.LineSegments);
+			axes.name = "axes";
 
-		return axes;
+			return axes;
+		}
 	},
 
 	createDiamond: function(size, mat){
+		if(this.diamondMesh){
+			var mesh = this.diamondMesh.clone();
+			mesh.scale.set(size[0], size[1], size[2]);
+			return mesh;
+		}
 		var geo = new THREE.Geometry();
 		var mat = mat || new THREE.MeshLambertMaterial({color: 0x800000});
 
-		geo.vertices.push(new THREE.Vector3(size[0], 0, 0));
-		geo.vertices.push(new THREE.Vector3(-size[0], 0, 0));
-		geo.vertices.push(new THREE.Vector3(0, size[1], 0));
-		geo.vertices.push(new THREE.Vector3(0, -size[1], 0));
-		geo.vertices.push(new THREE.Vector3(0, 0, size[2]));
-		geo.vertices.push(new THREE.Vector3(0, 0, -size[2]));
+		geo.vertices.push(new THREE.Vector3(1, 0, 0));
+		geo.vertices.push(new THREE.Vector3(-1, 0, 0));
+		geo.vertices.push(new THREE.Vector3(0, 1, 0));
+		geo.vertices.push(new THREE.Vector3(0, -1, 0));
+		geo.vertices.push(new THREE.Vector3(0, 0, 1));
+		geo.vertices.push(new THREE.Vector3(0, 0, -1));
 
 		geo.faces.push(new THREE.Face3(0, 2, 4));
 		geo.faces.push(new THREE.Face3(0, 4, 3));
@@ -325,20 +335,23 @@ Actor.prototype = {
 		var uvb = new THREE.Vector2(0, 1);
 		var uvc = new THREE.Vector2(1, 1);
 		var uvd = new THREE.Vector2(1, 0);
+		var uve = new THREE.Vector2(0.5, 0.5);
 
-		geo.faceVertexUvs[ 0 ].push( [ uvb, uva, uvd ] );
-		geo.faceVertexUvs[ 0 ].push( [ uvb, uva, uvd ] );
-		geo.faceVertexUvs[ 0 ].push( [ uvb, uva, uvd ] );//under
-		geo.faceVertexUvs[ 0 ].push( [ uvb, uva, uvd ] );//under
+		geo.faceVertexUvs[ 0 ].push( [ uvc, uve, uvb ] );
+		geo.faceVertexUvs[ 0 ].push( [ uvc, uvb, uve ] );
+		geo.faceVertexUvs[ 0 ].push( [ uvc, uve, uvd ] );//under
+		geo.faceVertexUvs[ 0 ].push( [ uvc, uvd, uve ] );//under
 
-		geo.faceVertexUvs[ 0 ].push( [ uva, uvd, uvb ] );
-		geo.faceVertexUvs[ 0 ].push( [ uva, uvd, uvb ] );
-		geo.faceVertexUvs[ 0 ].push( [ uva, uvd, uvb ] );//under
-		geo.faceVertexUvs[ 0 ].push( [ uva, uvd, uvb ] );//under
+		geo.faceVertexUvs[ 0 ].push( [ uva, uve, uvd ] );
+		geo.faceVertexUvs[ 0 ].push( [ uva, uvd, uve ] );
+		geo.faceVertexUvs[ 0 ].push( [ uva, uve, uvb ] );//under
+		geo.faceVertexUvs[ 0 ].push( [ uva, uvb, uve ] );//under
 
 		geo.computeFaceNormals();
 
 		var diamond = new THREE.Mesh(geo, mat);
+		this.diamondMesh = diamond.clone();
+		diamond.scale.set(size[0], size[1], size[2]);
 		return diamond;
 	},
 
