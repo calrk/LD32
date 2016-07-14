@@ -6,7 +6,8 @@ var s3 = require('gulp-s3');
 var fs = require('fs');
 
 var paths = {
-	js : ['./scripts/*.js']
+	js : ['./restructure/LD32.js', './restructure/*.js']
+	// js : ['./scripts/*.js']
 };
 
 gulp.task('default', ['js', 'connect', 'watch']);
@@ -15,6 +16,7 @@ gulp.task('build', ['js']);
 gulp.task('js', function(){
 	gulp.src(paths.js)
 		.pipe(concat('ld32.js'))
+		// .pipe(uglify())
 		.pipe(gulp.dest('./build/'));
 
 /*	gulp.src(paths.js)

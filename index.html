@@ -4,18 +4,20 @@
 
 	<script type="text/javascript" src="./resources/jquery-2.1.3.min.js"></script>
 	<script type="text/javascript" src="./resources/three.min.js"></script>
+	<script type="text/javascript" src="./resources/stats.min.js"></script>
 	<script type="text/javascript" src="./resources/clarity.min.js"></script>
+	<script type="text/javascript" src="./resources/simplex.min.js"></script>
+	<!-- <script type="text/javascript" src="./resources/VREffect.js"></script> -->
+	<script type="text/javascript" src="./resources/StereoEffect.js"></script>
+	<script type="text/javascript" src="./resources/DeviceOrientationControls.js"></script>
+	<script type="text/javascript" src="./resources/hammer.min.js"></script>
+	<script type="text/javascript" src="./resources/nosleep.min.js"></script>
+	<script type="text/javascript" src="./resources/socketiop2p.min.js"></script>
+	<script type="text/javascript" src="./resources/socket.io.js"></script>
 
-	<script type="text/javascript" src="main.js"></script>
+	<!--<script type="text/javascript" src="main.js"></script>-->
 	
 	<script type="text/javascript" src="./build/ld32.js"></script>
-	<!--<script type="text/javascript" src="./scripts/hud.js"></script>
-	<script type="text/javascript" src="./scripts/actor.js"></script>
-	<script type="text/javascript" src="./scripts/player.js"></script>
-	<script type="text/javascript" src="./scripts/gameController.js"></script>
-	<script type="text/javascript" src="./scripts/keyboardControls.js"></script>
-	<script type="text/javascript" src="./scripts/textures.js"></script>
-	<script type="text/javascript" src="./scripts/loader.js"></script>-->
 
 	<link rel="stylesheet" type="text/css" href="./resources/style.css">
 
@@ -46,7 +48,7 @@
 
 			<p>Hunt around their burrow for them and walk into the insects to attack them.</p>
 
-			<hr>
+			<!-- <hr>
 			<h3>Controls</h3>
 			<table>
 				<tr>
@@ -73,10 +75,10 @@
 					<td>E</td>
 					<td> - Rotates right</td>
 				</tr>
-			</table>
+			</table> -->
 
 			<hr>
-			<p>Click here to play when loaded - <input id='startButton' type='button' value='Loading...' onclick='startGame();' disabled></p>
+			<p>Click here to play when loaded - <input id='startButton' type='button' value='Loading...' onclick='LD32.start();' disabled></p>
 			<hr>
 			<p>Created by Clark Lavery for Ludum Dare 32.</p>
 		</div>
@@ -91,7 +93,7 @@
 			<p>Thank you for playing!</p>
 
 			<hr>
-			<input type='button' value='Restart' onclick='restartGame();'>
+			<input type='button' value='Restart' onclick='LD32.restart();'>
 			<hr>
 			<p>Created by Clark Lavery for Ludum Dare 32.</p>
 		</div>
@@ -106,7 +108,7 @@
 			<p>Thank you for playing!</p>
 
 			<hr>
-			<input type='button' value='Restart' onclick='restartGame();'>
+			<input type='button' value='Restart' onclick='LD32.restart();'>
 			<hr>
 			<p>Created by Clark Lavery for Ludum Dare 32.</p>
 		</div>
