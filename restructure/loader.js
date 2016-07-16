@@ -20,18 +20,14 @@ LD32.Loader = function(params){
 	function loadModel(name){
 		// loadingCount ++;
 		//load a model and add it to the model object
-		console.log(objectloader)
 		objectloader.load('../models/' + name + '.json', function(object){
-			console.log('asdasd')
 			loadedCount ++;
 			// var material = new THREE.MultiMaterial( materials );
 			models[name] = object;
 			// models[name].rotation.x = Math.PI/2;
 		}, function(e){//progress
-			console.log(e)
 
 		}, function(){//error
-			console.log('dasdsa')
 			loadedCount ++;
 		});
 	}

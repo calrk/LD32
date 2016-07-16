@@ -37,7 +37,6 @@ LD32.Sounds = function(params){
 	}
 	
 	this.play = function(sound) {
-		return;
 		if(!this.sounds[sound]){
 			console.log("Sound not loaded: " + sound);
 			return;

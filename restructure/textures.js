@@ -5,7 +5,7 @@ LD32.Textures = function(params){
 	var canvas = document.createElement('canvas');
 	var ctx = canvas.getContext('2d');
 	
-	canvas.width = canvas.height = 512;
+	canvas.width = canvas.height = 128;
 	var isReady = false;
 
 	this.ready = function(){
@@ -83,7 +83,7 @@ LD32.Textures = function(params){
 
 	this.setOptions = function(params){
 		var params = params || {};
-		canvas.width = canvas.height = params.resolution || 512;
+		canvas.width = canvas.height = params.resolution || canvas.width || 512;
 
 		textureSettings['tiles'] = {
 			wrap: true,

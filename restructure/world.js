@@ -14,7 +14,7 @@ LD32.World = function(params){
 	var length = params.length || 100;
 	var width = params.width || 20;
 
-	var floorMat = new THREE.MeshPhongMaterial({
+	/*var floorMat = new THREE.MeshPhongMaterial({
 		shininess: 1, 
 		color: 0xcb6e00, 
 		specular: 0x444444, 
@@ -27,15 +27,17 @@ LD32.World = function(params){
 		specular: 0x444444, 
 		map: LD32.textures.getTexture('dirtCeil'),
 		normalMap: LD32.textures.getTexture('dirtCeilNorm')
-	});
+	});*/
 
-	var wallMat = new THREE.MeshPhongMaterial({
-		shininess: 1,
+	var wallMat = new THREE.MeshLambertMaterial({
+		// shininess: 1,
 		color: 0xcb6e00, 
-		specular: 0x444444,
+		// specular: 0x444444,
 		map: LD32.textures.getTexture('wall'),
-		normalMap: LD32.textures.getTexture('noiseNorm')
+		// normalMap: LD32.textures.getTexture('noiseNorm')
 	});
+	var ceilMat = wallMat;
+	var floorMat = wallMat;
 
 	var dustMaterial = new THREE.PointsMaterial({
 		color: 0x743f00, 
@@ -62,18 +64,12 @@ LD32.World = function(params){
 		transparent: true
 	});*/
 
-	var sceneRenderTarget = new THREE.Scene();
+	/*var sceneRenderTarget = new THREE.Scene();
 	var cameraOrtho = new THREE.OrthographicCamera(512 / - 2, 512 / 2, 512 / 2, 512 / - 2, -10000, 10000);
 	cameraOrtho.position.z = 100;
 	var quadTarget = new THREE.Mesh( new THREE.PlaneGeometry( 512, 512 ), new THREE.MeshBasicMaterial( { color: 0xff0000 } ) );
 	quadTarget.position.z = -500;
 	sceneRenderTarget.add( quadTarget );
-
-	// var renderer2 = new THREE.WebGLRenderer({ antialias: false});
-	// renderer2.setSize(512, 512);
-	// renderer2.setClearColor(0x000000, 1.0);
-	// renderer2.autoClear = false;
-	// renderer2.sortObjects = false;
 
 	var uniforms = {
 		time:  { type: "f", value: 1.0 },
@@ -93,11 +89,11 @@ LD32.World = function(params){
 		minFilter: THREE.LinearMipMapLinearFilter,
 		magFilter: THREE.LinearFilter,
 		format: THREE.RGBFormat
-	});
+	});*/
 
 	var displacementUniforms = {
 		time:  { type: "f", value: 1.0 },
-		tHeightMap:  { type: "t",  value: noiseMap.texture },
+		// tHeightMap:  { type: "t",  value: noiseMap.texture },
 		uDisplacementBias: { type: "f", value: 0.09 },
 		uDisplacementScale: { type: "f", value: 0.04 },
 		uColor1: { type: "c", value: new THREE.Color( 0xffff00 ) },
@@ -156,11 +152,11 @@ LD32.World = function(params){
 		fireEmbers.geometry.verticesNeedUpdate = true;*/
 
 		displacementUniforms.time.value += dt*0.3;
-		uniforms.uSpeed.value += dt*3;
-		uniforms.time.value += dt*0.3;
-
-		LD32.renderer.clear();
-		LD32.renderer.render( sceneRenderTarget, cameraOrtho, noiseMap, true );
+		// uniforms.uSpeed.value += dt*3;
+		// uniforms.time.value += dt*0.3;
+		// LD32.renderer.clear();
+		// LD32.renderer.render( sceneRenderTarget, cameraOrtho, noiseMap, true );
+		
 	}
 
 	this.createWorld = function(){
@@ -253,7 +249,6 @@ LD32.World = function(params){
 			firefly.light = light;
 			fireflies.push(firefly);
 		}
-		return;
 
 		//add torches
 		// fireParticles = new THREE.Geometry();
@@ -317,7 +312,8 @@ LD32.World = function(params){
 		var mergeGeometry = new THREE.Geometry();
 		var scale = Math.random()*0.4+0.8;
 
-		var mite = new THREE.Mesh(new THREE.CylinderGeometry( 0, 0.25*scale, 1.5*scale, 32, 1, true), wallMat);
+		var mite = new THREE.Mesh(new THREE.ConeGeometry( 0.25*scale, 1.5*scale, 32), wallMat);
+		mite.rotation.y = Math.PI*Math.random()*2;
 		mite.position.x = Math.random()*1.5-0.75;
 		mite.position.y = -(2-1.5*scale)/2;
 		mite.position.z = Math.random()*1.5-0.75;
@@ -326,7 +322,8 @@ LD32.World = function(params){
 		mergeGeometry.merge(mite.geometry, matrix);
 
 		scale = Math.random()*0.2+0.9;
-		mite = new THREE.Mesh(new THREE.CylinderGeometry( 0, 0.25*scale, 1.5*scale, 32 ), wallMat);
+		mite = new THREE.Mesh(new THREE.ConeGeometry(0.25*scale, 1.5*scale, 32 ), wallMat);
+		mite.rotation.y = Math.PI*Math.random()*2;
 		mite.position.x = Math.random()*1.5-0.75;
 		mite.position.y = -(2-1.5*scale)/2;
 		mite.position.z = Math.random()*1.5-0.75;
@@ -335,7 +332,8 @@ LD32.World = function(params){
 		mergeGeometry.merge(mite.geometry, matrix);
 
 		scale = Math.random()*0.2+0.9;
-		mite = new THREE.Mesh(new THREE.CylinderGeometry( 0, 0.125*scale, 0.5*scale, 32 ), wallMat);
+		mite = new THREE.Mesh(new THREE.ConeGeometry(0.125*scale, 0.5*scale, 32 ), wallMat);
+		mite.rotation.y = Math.PI*Math.random()*2;
 		mite.position.x = Math.random()*1.5-0.75;
 		mite.position.y = -(2-0.5*scale)/2;
 		mite.position.z = Math.random()*1.5-0.75;
@@ -344,7 +342,8 @@ LD32.World = function(params){
 		mergeGeometry.merge(mite.geometry, matrix);
 
 		scale = Math.random()*0.2+0.9;
-		mite = new THREE.Mesh(new THREE.CylinderGeometry( 0, 0.125*scale, 0.5*scale, 32 ), wallMat);
+		mite = new THREE.Mesh(new THREE.ConeGeometry(0.125*scale, 0.5*scale, 32 ), wallMat);
+		mite.rotation.y = Math.PI*Math.random()*2;
 		mite.position.x = Math.random()*1.5-0.75;
 		mite.position.y = -(2-0.5*scale)/2;
 		mite.position.z = Math.random()*1.5-0.75;
@@ -352,7 +351,8 @@ LD32.World = function(params){
 		matrix = mite.matrix;
 		mergeGeometry.merge(mite.geometry, matrix);
 
-		mite = new THREE.Mesh(new THREE.CylinderGeometry( 0, 0.125*scale, 0.25*scale, 32 ), wallMat);
+		mite = new THREE.Mesh(new THREE.ConeGeometry(0.125*scale, 0.25*scale, 32 ), wallMat);
+		mite.rotation.y = Math.PI*Math.random()*2;
 		mite.position.x = Math.random()*1.5-0.75;
 		mite.position.y = -(2-0.25*scale)/2;
 		mite.position.z = Math.random()*1.5-0.75;
@@ -361,6 +361,7 @@ LD32.World = function(params){
 		mergeGeometry.merge(mite.geometry, matrix);
 
 		mite = new THREE.Mesh(new THREE.SphereGeometry( 1, 16, 16 ), wallMat);
+		mite.rotation.y = Math.PI*Math.random()*2;
 		mite.position.x = Math.random()*0.5-0.25;
 		mite.position.y = -1.75;
 		mite.position.z = Math.random()*0.5-0.25;
@@ -378,7 +379,8 @@ LD32.World = function(params){
 		object.rotation.x = Math.PI;
 
 		var scale = Math.random()*0.2+0.9;
-		var mite = new THREE.Mesh(new THREE.CylinderGeometry( 0, 0.125*scale, 0.5*scale, 32 ), wallMat);
+		var mite = new THREE.Mesh(new THREE.ConeGeometry(0.125*scale, 0.5*scale, 32 ), wallMat);
+		mite.rotation.y = Math.PI*Math.random()*2;
 		mite.position.x = Math.random()*1-0.5;
 		mite.position.y = (2-0.5*scale)/2;
 		mite.position.z = Math.random()*1-0.5;
@@ -386,7 +388,8 @@ LD32.World = function(params){
 		object.add(mite);
 
 		scale = Math.random()*0.2+0.9;
-		mite = new THREE.Mesh(new THREE.CylinderGeometry( 0, 0.125*scale, 0.75*scale, 32 ), wallMat);
+		mite = new THREE.Mesh(new THREE.ConeGeometry(0.125*scale, 0.75*scale, 32 ), wallMat);
+		mite.rotation.y = Math.PI*Math.random()*2;
 		mite.position.x = Math.random()*1-0.5;
 		mite.position.y = (2-0.75*scale)/2;
 		mite.position.z = Math.random()*1-0.5;

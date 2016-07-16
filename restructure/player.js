@@ -176,7 +176,9 @@ LD32.Player.prototype.stillAction = function(dt){
 
 LD32.Player.prototype.updateSelf = function(dt){
 	this.light.intensity = Math.sin(LD32.clock.elapsedTime)*0.2+0.9;
-	this.orientation.update();
+	if(this.orientation.deviceOrientation.alpha !== null){
+		this.orientation.update();
+	}
 }
 
 LD32.Player.prototype.attackAnim = function(){

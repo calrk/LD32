@@ -32,12 +32,12 @@ LD32.Ant.prototype.resetSelf = function(){
 
 LD32.Ant.prototype.createModel = function(){
 	this.antMat = new THREE.MeshLambertMaterial({color: 0x800000});
-	this.antMat = new THREE.MeshPhongMaterial({
-		shininess: 1, 
+	this.antMat = new THREE.MeshLambertMaterial({
+		// shininess: 1, 
 		color: 0xA00000, 
-		specular: 0x444444, 
+		// specular: 0x444444, 
 		map: LD32.textures.getTexture('cloud'),
-		normalMap: LD32.textures.getTexture('noiseNorm')
+		// normalMap: LD32.textures.getTexture('noiseNorm')
 	});
 	this.blackMat = new THREE.MeshLambertMaterial({color: 0x000000});
 	this.model = this.createBody();

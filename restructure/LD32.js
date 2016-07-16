@@ -15,6 +15,7 @@ var LD32 = {
 	socket: undefined,
 	p2p: undefined,
 	gloop: undefined,
+	rendering: false,
 
 	init: function(){
 		var self = this;
@@ -53,10 +54,10 @@ var LD32 = {
 		this.hammertime = new Hammer(docEl);
 		this.noSleep = new NoSleep();
 
-		/*this.hammertime.get('pinch').set({ enable: true });
+		this.hammertime.get('pinch').set({ enable: true });
 		this.hammertime.on('pinchout', function(ev) {
 			self.noSleep.enable();
-			self.effect = new THREE.StereoEffect(self.renderer);
+			// self.effect = new THREE.StereoEffect(self.renderer);
 			requestFullScreen.call(document.documentElement);
 		});
 		this.hammertime.on('pinchin', function(ev) {
@@ -75,13 +76,17 @@ var LD32 = {
 
 		this.hammertime.on('swipeup', function(ev) {
 			self.action = 'swipeup';
+			if(!self.rendering){
+				self.rendering = true;
+				self.loop();
+			}
 		});
 
 		this.hammertime.on('swipedown', function(ev) {
 			self.action = 'swipedown';
-		});*/
+		});
 
-		/*this.socket = io.connect('https://server.clarklavery.com', {
+		this.socket = io.connect('https://server.clarklavery.com', {
 			'connect timeout': 5000,
 			secure: true
 		});
@@ -103,7 +108,7 @@ var LD32 = {
 
 		this.p2p.on('go-private', function () {
 			self.p2p.useSockets = false;
-		});*/
+		});
 
 		this.load();
 		console.log("Loading...");
@@ -126,13 +131,12 @@ var LD32 = {
 			});
 
 			self.gloop = LD32.gameController.update.bind(LD32.gameController);
-			self.loop();
 		}, 100);
 	},
 
 	loop: function(){
 		// requestAnimationFrame(LD32.loop);
-		setTimeout(LD32.loop, 128);
+		setTimeout(LD32.loop, 32);
 		LD32.stats.begin();
 		var dt = LD32.clock.getDelta();
 
