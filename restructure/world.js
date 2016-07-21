@@ -91,23 +91,30 @@ LD32.World = function(params){
 		format: THREE.RGBFormat
 	});*/
 
-	var displacementUniforms = {
+	/*var displacementUniforms = {
 		time:  { type: "f", value: 1.0 },
+		tHeightMap:  { type: "t",  value: LD32.textures.getTexture('cloud') },
 		// tHeightMap:  { type: "t",  value: noiseMap.texture },
 		uDisplacementBias: { type: "f", value: 0.09 },
-		uDisplacementScale: { type: "f", value: 0.04 },
+		uDisplacementScale: { type: "f", value: 0.08 },
 		uColor1: { type: "c", value: new THREE.Color( 0xffff00 ) },
 		uColor2: { type: "c", value: new THREE.Color( 0xff8800 ) },
 		uSmoke: { type: "f", value: 0.8 },
 		uShapeBias: { type: "v2", value: new THREE.Vector2(0.23, 0.88) },
 		uTurbulence: { type: "f", value: 5 }
+	};*/
+
+	var fireUniforms = {
+		tHeightMap:  { type: "t",  value: LD32.textures.getTexture('cloud') },
+		uColor: { type: "c", value: new THREE.Color( 0xff4800 ) },
+		time: { type: "f", value: 0.0 },
 	};
 
 	var displacementMaterial = new THREE.ShaderMaterial({
 		transparent:	true,
-		uniforms:		displacementUniforms,
-		vertexShader:	LD32.shaderLoader.getShader('disp_vertex'),
-		fragmentShader: LD32.shaderLoader.getShader('disp_fragment'),
+		uniforms: fireUniforms,
+		vertexShader:	LD32.shaderLoader.getShader('fire_vertex'),
+		fragmentShader: LD32.shaderLoader.getShader('fire_fragment'),
 		// lights:			false
 	});
 
@@ -140,6 +147,7 @@ LD32.World = function(params){
 		for(var i = 0; i < torches.length; i++){
 			torches[i].light.intensity = Math.sin(LD32.clock.elapsedTime*16)*0.2+0.9;
 		}
+		fireUniforms.time.value += dt;
 
 		/*fireEmbers.geometry.vertices.forEach(function(vertex){
 			vertex.y += dt*0.5;
@@ -151,12 +159,11 @@ LD32.World = function(params){
 		});
 		fireEmbers.geometry.verticesNeedUpdate = true;*/
 
-		displacementUniforms.time.value += dt*0.3;
+		// displacementUniforms.time.value += dt*0.3;
 		// uniforms.uSpeed.value += dt*3;
 		// uniforms.time.value += dt*0.3;
 		// LD32.renderer.clear();
 		// LD32.renderer.render( sceneRenderTarget, cameraOrtho, noiseMap, true );
-		
 	}
 
 	this.createWorld = function(){
@@ -186,6 +193,9 @@ LD32.World = function(params){
 		//add inside walls
 		for(var i = 0; i < params.width+1; i+=2){
 			for(var j = 0; j < params.length+1; j+=2){
+				if(i < 3 && j < 3){
+					continue;
+				}
 				var x = Math.floor(Math.random()*2);
 				var y = Math.floor(Math.random()*2);
 
@@ -249,7 +259,6 @@ LD32.World = function(params){
 			firefly.light = light;
 			fireflies.push(firefly);
 		}
-
 		//add torches
 		// fireParticles = new THREE.Geometry();
 		for(var j = 0; j < 5; j++){
@@ -266,22 +275,22 @@ LD32.World = function(params){
 			torchHolder.position.z *= 2;
 			torchHolder.position.z += Math.random() < 0.5 ? -0.9 : 0.9;
 			torchHolder.position.x += Math.random() < 0.5 ? -0.9 : 0.9;
-			torchHolder.position.y = -0.25;
+			torchHolder.position.y = -1;
 			torchHolder.rotation.y = Math.random()*Math.PI*2;
 
-			torch.scale.set(0.15,0.25,0.15);
+			torch.scale.set(25,25,25);
 
 			world.add(torchHolder);
 			torchHolder.add(torch);
 			var light = new THREE.PointLight(0xff8800, 0.5, 3);
-			light.position.y = 0.5;
+			light.position.y = 0.7;
 			torchHolder.add(light);
 			torchHolder.light = light;
 
 			var fire = this.createFire();
-			fire.position.x = -0.01;
-			fire.position.y = 0.23;
-			fire.position.z = -0.01;
+			// fire.position.x = -0.01;
+			fire.position.y = 1.05;
+			// fire.position.z = -0.01;
 			torchHolder.add(fire);
 
 			/*for(var i = j*20; i < j*20+20; i++){
@@ -418,9 +427,8 @@ LD32.World = function(params){
 	}
 
 	this.createFire = function(){
-		var geometrySphere = new THREE.SphereGeometry( 0.1, 140, 100 );
-		mesh = new THREE.Mesh(geometrySphere, displacementMaterial);
-		mesh.scale.set(0.01,0.01,0.01);
+		// mesh = new THREE.Mesh(new THREE.SphereGeometry( 0.1, 32, 32 ), displacementMaterial);
+		mesh = new THREE.Mesh(new THREE.IcosahedronGeometry(0.1, 3), displacementMaterial);
 		return mesh;
 	}
 

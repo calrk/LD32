@@ -3,6 +3,8 @@ LD32.Loader = function(params){
 	var models = {};
 	var images = {};
 	var objectloader = new THREE.ObjectLoader();
+	var gltfLoader = new THREE.glTFLoader;
+
 	// objectloader.texturePath = '../textures/';
 	var loadingCount = 0;
 	var loadedCount = 0;
@@ -18,9 +20,9 @@ LD32.Loader = function(params){
 	loadModel('torch');
 
 	function loadModel(name){
-		// loadingCount ++;
+		loadingCount ++;
 		//load a model and add it to the model object
-		objectloader.load('../models/' + name + '.json', function(object){
+		/*objectloader.load('../models/' + name + '.json', function(object){
 			loadedCount ++;
 			// var material = new THREE.MultiMaterial( materials );
 			models[name] = object;
@@ -29,6 +31,17 @@ LD32.Loader = function(params){
 
 		}, function(){//error
 			loadedCount ++;
+		});*/
+		gltfLoader.load('../models/' + name + '.gltf', function(data){
+			loadedCount ++;
+			models[name] = data.scene;
+
+			models[name].traverse(function(part){
+				if(part.material){
+					var col = new THREE.Color(part.material.uniforms.u_diffuse.value.x, part.material.uniforms.u_diffuse.value.y, part.material.uniforms.u_diffuse.value.z);
+					part.material = new THREE.MeshLambertMaterial({color: col.getHex()});
+				}
+			});		
 		});
 	}
 

@@ -8,8 +8,8 @@ LD32.Shader = function(params){
 	loadShader('disp_fragment');
 	loadShader('noise_vertex');
 	loadShader('noise_fragment');
-	// loadShader('fire_vertex');
-	// loadShader('fire_fragment');
+	loadShader('fire_vertex');
+	loadShader('fire_fragment');
 
 	function loadShader(file){
 		loadingCount ++;

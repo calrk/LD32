@@ -75,10 +75,12 @@ var LD32 = {
 		});
 
 		this.hammertime.on('swipeup', function(ev) {
-			self.action = 'swipeup';
 			if(!self.rendering){
 				self.rendering = true;
 				self.loop();
+			}
+			else{
+				self.action = 'swipeup';
 			}
 		});
 
