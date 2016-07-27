@@ -14,21 +14,6 @@ LD32.World = function(params){
 	var length = params.length || 100;
 	var width = params.width || 20;
 
-	/*var floorMat = new THREE.MeshPhongMaterial({
-		shininess: 1, 
-		color: 0xcb6e00, 
-		specular: 0x444444, 
-		map: LD32.textures.getTexture('dirtCeil'),
-		normalMap: LD32.textures.getTexture('dirtCeilNorm')
-	});
-	var ceilMat = new THREE.MeshPhongMaterial({
-		shininess: 1, 
-		color: 0xcb6e00, 
-		specular: 0x444444, 
-		map: LD32.textures.getTexture('dirtCeil'),
-		normalMap: LD32.textures.getTexture('dirtCeilNorm')
-	});*/
-
 	var wallMat = new THREE.MeshLambertMaterial({
 		// shininess: 1,
 		color: 0xcb6e00, 
@@ -55,55 +40,6 @@ LD32.World = function(params){
 		transparent: true
 	});
 
-	/*var fireEmberMaterial = new THREE.PointsMaterial({
-		color: 0xff8800, 
-		size: 0.01,
-		map: LD32.textures.getTexture('firefly'),
-		blending: THREE.AdditiveBlending,
-		opacity: 0.5,
-		transparent: true
-	});*/
-
-	/*var sceneRenderTarget = new THREE.Scene();
-	var cameraOrtho = new THREE.OrthographicCamera(512 / - 2, 512 / 2, 512 / 2, 512 / - 2, -10000, 10000);
-	cameraOrtho.position.z = 100;
-	var quadTarget = new THREE.Mesh( new THREE.PlaneGeometry( 512, 512 ), new THREE.MeshBasicMaterial( { color: 0xff0000 } ) );
-	quadTarget.position.z = -500;
-	sceneRenderTarget.add( quadTarget );
-
-	var uniforms = {
-		time:  { type: "f", value: 1.0 },
-		uSpeed:  { type: "f", value: 1.0 },
-		scale: { type: "v2", value: new THREE.Vector2( 1, 1 ) }
-	};
-
-	var noiseMaterial = new THREE.ShaderMaterial({
-		uniforms:		uniforms,
-		vertexShader:   LD32.shaderLoader.getShader('noise_vertex'),
-		fragmentShader: LD32.shaderLoader.getShader('noise_fragment'),
-		// lights: false
-	});
-	quadTarget.material = noiseMaterial;
-
-	var noiseMap = new THREE.WebGLRenderTarget( 512, 512, {
-		minFilter: THREE.LinearMipMapLinearFilter,
-		magFilter: THREE.LinearFilter,
-		format: THREE.RGBFormat
-	});*/
-
-	/*var displacementUniforms = {
-		time:  { type: "f", value: 1.0 },
-		tHeightMap:  { type: "t",  value: LD32.textures.getTexture('cloud') },
-		// tHeightMap:  { type: "t",  value: noiseMap.texture },
-		uDisplacementBias: { type: "f", value: 0.09 },
-		uDisplacementScale: { type: "f", value: 0.08 },
-		uColor1: { type: "c", value: new THREE.Color( 0xffff00 ) },
-		uColor2: { type: "c", value: new THREE.Color( 0xff8800 ) },
-		uSmoke: { type: "f", value: 0.8 },
-		uShapeBias: { type: "v2", value: new THREE.Vector2(0.23, 0.88) },
-		uTurbulence: { type: "f", value: 5 }
-	};*/
-
 	var fireUniforms = {
 		tHeightMap:  { type: "t",  value: LD32.textures.getTexture('cloud') },
 		uColor: { type: "c", value: new THREE.Color( 0xff4800 ) },
@@ -114,8 +50,7 @@ LD32.World = function(params){
 		transparent:	true,
 		uniforms: fireUniforms,
 		vertexShader:	LD32.shaderLoader.getShader('fire_vertex'),
-		fragmentShader: LD32.shaderLoader.getShader('fire_fragment'),
-		// lights:			false
+		fragmentShader: LD32.shaderLoader.getShader('fire_fragment')
 	});
 
 	this.reset = function(){
@@ -148,22 +83,6 @@ LD32.World = function(params){
 			torches[i].light.intensity = Math.sin(LD32.clock.elapsedTime*16)*0.2+0.9;
 		}
 		fireUniforms.time.value += dt;
-
-		/*fireEmbers.geometry.vertices.forEach(function(vertex){
-			vertex.y += dt*0.5;
-			vertex.x = vertex.initial.x+Math.sin(LD32.clock.elapsedTime*2+vertex.offsetxdist)/20;
-			vertex.z = vertex.initial.z+Math.sin(LD32.clock.elapsedTime*2+vertex.offsetzdist)/20;
-			if(vertex.y > 1.5){
-				vertex.y = vertex.initial.y;
-			}
-		});
-		fireEmbers.geometry.verticesNeedUpdate = true;*/
-
-		// displacementUniforms.time.value += dt*0.3;
-		// uniforms.uSpeed.value += dt*3;
-		// uniforms.time.value += dt*0.3;
-		// LD32.renderer.clear();
-		// LD32.renderer.render( sceneRenderTarget, cameraOrtho, noiseMap, true );
 	}
 
 	this.createWorld = function(){
@@ -259,8 +178,8 @@ LD32.World = function(params){
 			firefly.light = light;
 			fireflies.push(firefly);
 		}
+
 		//add torches
-		// fireParticles = new THREE.Geometry();
 		for(var j = 0; j < 5; j++){
 			var torchHolder = new THREE.Object3D();
 			var torch = LD32.loader.getModel('torch');
@@ -288,33 +207,11 @@ LD32.World = function(params){
 			torchHolder.light = light;
 
 			var fire = this.createFire();
-			// fire.position.x = -0.01;
 			fire.position.y = 1.05;
-			// fire.position.z = -0.01;
 			torchHolder.add(fire);
-
-			/*for(var i = j*20; i < j*20+20; i++){
-				fireParticles.vertices.push( new THREE.Vector3(
-					torchHolder.position.x + Math.random()*0.15-0.126,
-					torchHolder.position.y + 0.2,
-					torchHolder.position.z + Math.random()*0.15-0.126)
-				);
-				fireParticles.vertices[i].initial = {};
-				fireParticles.vertices[i].initial.x = fireParticles.vertices[i].x;
-				fireParticles.vertices[i].initial.y = fireParticles.vertices[i].y;
-				fireParticles.vertices[i].initial.z = fireParticles.vertices[i].z;
-				
-				fireParticles.vertices[i].y -= Math.random()*5;
-
-				fireParticles.vertices[i].offsetxdist = Math.random()*4-2;
-				// fireParticles.vertices[i].offsetydist = Math.random()*4-2;
-				fireParticles.vertices[i].offsetzdist = Math.random()*4-2;
-			}*/
 
 			torches.push(torchHolder);
 		}
-		// fireEmbers = new THREE.Points(fireParticles, fireEmberMaterial);
-		// world.add(fireEmbers);
 	}
 
 	this.createStalagmite = function(){
@@ -472,88 +369,5 @@ LD32.World = function(params){
 		geo.computeVertexNormals();
 		var floor = new THREE.Mesh(geo, floorMat);
 		return floor;
-		/*for(var i = -4.5; i < 5.5; i++){
-			for(var j = -4.5; j < 5.5; j++){
-				geo.vertices.push(new THREE.Vector3(i, 0, j));
-			}
-		}
-		for(var i = 1; i < 9; i++){
-			for(var j = 1; j < 9; j++){
-				var a = j + 11 * i;
-				var b = j + 11 * ( i + 1 );
-				var c = ( j + 1 ) + 11 * ( i + 1 );
-				var d = ( j + 1 ) + 11 * i;
-
-				geo.faces.push(new THREE.Face3(a, b, d));
-			}
-		}
-		geo.computeFaceNormals();
-		var floor = new THREE.Mesh(geo, floorMat);
-		floor.position.y = -1;
-		return floor;*/
-		/*for(var i = 0; i < 10; i++){
-			for(var j = 0; j < 10; j++){
-				geo.vertices.push(new THREE.Vector3(i, 1, j));
-				if(i > 1 && j > 1){
-					var x = i*10;
-					var y = x + j;
-					geo.faces.push(new THREE.Face3(x, x+1, y));
-					geo.faces.push(new THREE.Face3(x, y, y+1));
-				}
-			}
-		}
-		geo.computeFaceNormals();
-		return new THREE.Mesh(geo, wallMat);*/
-		var floor = new THREE.Mesh(new THREE.PlaneBufferGeometry(2, 2, 10, 10), floorMat);
-		floor.position.y = -1;
-		return floor;
 	}
-
-	/*this.createWall = function(){
-		var geo = new THREE.BufferGeometry();
-
-		var vertexCount = 8;
-		var vertices = new Float32Array(vertexCount * 3);
-		vertices = Float32Array.from([
-						 1, -1,  1,
-						 1, -1, -1,
-						-1, -1, -1,
-						-1, -1,  1,
-				
-						 1, 1,  1,
-						 1, 1, -1,
-						-1, 1, -1,
-						-1, 1,  1]);
-		geo.addAttribute('position', new THREE.BufferAttribute(vertices, 3));
-
-		var indices = new Uint16Array(vertexCount * 3);
-		indices = Uint16Array.from([
-						0, 1, 5,
-						0, 5, 4,
-						1, 2, 6,
-						1, 6, 5,
-						2, 3, 7,
-						2, 7, 6,
-						3, 0, 4,
-						3, 4, 7]);
-		geo.setIndex(new THREE.BufferAttribute(indices, 1));
-
-		var uvs = new Float32Array(vertexCount * 2);
-		uvs = Float32Array.from([
-						0, 0, //0
-						0, 1, //1
-						0, 0, //2
-						0, 1, //3
-
-						1, 1, //4
-						1, 0, //5
-						1, 1, //6
-						1, 0, //7
-						]);
-		geo.addAttribute('uv', new THREE.BufferAttribute(uvs, 2));
-
-		geo.computeVertexNormals();
-		var floor = new THREE.Mesh(geo, floorMat);
-		return floor;
-	}*/
 }

@@ -37,8 +37,8 @@ var LD32 = {
 		this.shaderLoader = new LD32.Shader();
 		
 		this.stats = new Stats();
-		this.stats.showPanel(0);
-		document.body.appendChild(this.stats.dom);
+		// this.stats.showPanel(0);
+		// document.body.appendChild(this.stats.dom);
 
 		this.clock = new THREE.Clock();
 		this.clock.start();
@@ -46,26 +46,17 @@ var LD32 = {
 		this.textures = new LD32.Textures();
 		this.sounds = new LD32.Sounds();
 
+		this.mode = 'desktop';
+
 		var doc = window.document;
 		var docEl = doc.documentElement;
-		var requestFullScreen = docEl.requestFullscreen || docEl.mozRequestFullScreen || docEl.webkitRequestFullScreen || docEl.msRequestFullscreen;
-		var cancelFullScreen = doc.exitFullscreen || doc.mozCancelFullScreen || doc.webkitExitFullscreen || doc.msExitFullscreen;
+		this.requestFullScreen = docEl.requestFullscreen || docEl.mozRequestFullScreen || docEl.webkitRequestFullScreen || docEl.msRequestFullscreen;
+		this.cancelFullScreen = doc.exitFullscreen || doc.mozCancelFullScreen || doc.webkitExitFullscreen || doc.msExitFullscreen;
 
 		this.hammertime = new Hammer(docEl);
 		this.noSleep = new NoSleep();
 
-		this.hammertime.get('pinch').set({ enable: true });
-		this.hammertime.on('pinchout', function(ev) {
-			self.noSleep.enable();
-			// self.effect = new THREE.StereoEffect(self.renderer);
-			requestFullScreen.call(document.documentElement);
-		});
-		this.hammertime.on('pinchin', function(ev) {
-			self.noSleep.disable();
-			cancelFullScreen.call(document);
-		});
-
-		this.hammertime.get('swipe').set({ direction: Hammer.DIRECTION_ALL });
+		this.hammertime.get('swipe').set({ direction: Hammer.DIRECTION_HORIZONTAL });
 		this.hammertime.on('swipeleft', function(ev) {
 			self.action = 'swipeleft';
 		});
@@ -75,19 +66,95 @@ var LD32 = {
 		});
 
 		this.hammertime.on('swipeup', function(ev) {
-			if(!self.rendering){
-				self.rendering = true;
-				self.loop();
-			}
-			else{
-				self.action = 'swipeup';
-			}
+			self.action = 'swipeup';
 		});
 
 		this.hammertime.on('swipedown', function(ev) {
 			self.action = 'swipedown';
 		});
 
+		this.load();
+		console.log("Loading...");
+	},
+
+	load: function(){
+		var self = this;
+		var intv = setInterval(function(){
+			if(!self.loader.ready() || !self.sounds.ready()/* || !textures.ready()*/){
+				return;
+			}
+			clearInterval(intv);
+			console.log("Loaded.");
+
+			$('#playButt').show();
+
+			self.gameController = new LD32.GameController({
+				scene: self.scene
+			});
+
+			self.gloop = LD32.gameController.update.bind(LD32.gameController);
+		}, 100);
+	},
+
+	loop: function(){
+		// requestAnimationFrame(LD32.loop);
+		setTimeout(LD32.loop, 32);
+		LD32.stats.begin();
+		var dt = LD32.clock.getDelta();
+
+		LD32.gloop(dt);
+
+		if(LD32.effect){
+			LD32.effect.render(LD32.scene, LD32.gameController.player.camera);
+		}
+		else{
+			LD32.renderer.render(LD32.scene, LD32.gameController.player.camera);
+		}
+		LD32.stats.end();
+	},
+
+	setMode: function(mode){
+		$('#desktop').hide();
+		$('#mobile').hide();
+		$('#cardboard').hide();
+		this.mode = mode;
+		$('#' + this.mode).show();
+	},
+
+	start: function(){
+		var self = this;
+		$('#start').css({
+			display:'none',
+		});
+		this.gameController.start();
+		this.loop();
+
+		switch(this.mode){
+			case 'desktop':
+				$('#hud').show();
+				break;
+			case 'cardboard':
+				this.effect = new THREE.StereoEffect(this.renderer);
+				// this.effect = new THREE.VREffect(this.renderer);
+			case 'mobile':
+				this.requestFullScreen.call(document.documentElement);
+				this.noSleep.enable();
+
+				this.hammertime.get('swipe').set({ direction: Hammer.DIRECTION_ALL });
+				this.hammertime.get('pinch').set({ enable: true });
+				this.hammertime.on('pinchout', function(ev) {
+					self.noSleep.enable();
+					self.requestFullScreen.call(document.documentElement);
+				});
+				this.hammertime.on('pinchin', function(ev) {
+					self.noSleep.disable();
+					self.cancelFullScreen.call(document);
+				});
+				break;
+		}
+	},
+
+	setupSockets: function(){
 		this.socket = io.connect('https://server.clarklavery.com', {
 			'connect timeout': 5000,
 			secure: true
@@ -110,54 +177,8 @@ var LD32 = {
 
 		this.p2p.on('go-private', function () {
 			self.p2p.useSockets = false;
+			console.log('go privates')
 		});
-
-		this.load();
-		console.log("Loading...");
-	},
-
-	load: function(){
-		var self = this;
-		var intv = setInterval(function(){
-			if(!self.loader.ready() || !self.sounds.ready()/* || !textures.ready()*/){
-				return;
-			}
-			clearInterval(intv);
-			console.log("Loaded.");
-
-			$('#startButton').removeAttr('disabled');
-			$('#startButton')[0].value = 'Start';
-
-			self.gameController = new LD32.GameController({
-				scene: self.scene
-			});
-
-			self.gloop = LD32.gameController.update.bind(LD32.gameController);
-		}, 100);
-	},
-
-	loop: function(){
-		// requestAnimationFrame(LD32.loop);
-		setTimeout(LD32.loop, 32);
-		LD32.stats.begin();
-		var dt = LD32.clock.getDelta();
-
-		LD32.gloop(dt);
-
-		if(LD32.effect){
-			LD32.effect.render(LD32.scene2, LD32.gameController.player.camera);
-		}
-		else{
-			LD32.renderer.render(LD32.scene, LD32.gameController.player.camera);
-		}
-		LD32.stats.end();
-	},
-
-	start: function(){
-		$('#start').css({
-			display:'none',
-		});
-		this.gameController.start();
 	},
 
 	restart: function(){
@@ -177,6 +198,8 @@ var LD32 = {
 		$('#'+div).css({
 			display:'block',
 		});
+		$('#hud').hide();
+		this.hammertime.get('swipe').set({ direction: Hammer.DIRECTION_HORIZONTAL });
 	},
 
 	changeVolume: function(elem){

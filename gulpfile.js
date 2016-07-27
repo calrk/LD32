@@ -29,7 +29,8 @@ gulp.task('js', function(){
 gulp.task('connect', function () {
   connect.server({
     port: 3000
-  });
+  })
+  ;
 });
 
 gulp.task('watch', function () {

@@ -55,10 +55,9 @@ LD32.Fly.prototype.updateSelf = function(){
 }
 
 LD32.Fly.prototype.createModel = function(){
-	this.flyMat = new THREE.MeshLambertMaterial({color: 0x800000});
 	this.flyMat = new THREE.MeshLambertMaterial({
 		// shininess: 0.5, 
-		color: 0x081b00, 
+		color: 0x1b5c00, 
 		// specular: 0x113700, 
 		map: LD32.textures.getTexture('cloud'),
 		// normalMap: LD32.textures.getTexture('noiseNorm')
