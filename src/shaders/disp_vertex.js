@@ -24,8 +24,8 @@ void main( void ) {
 	float turbFactor = uTurbulence*(vUv.y-0.5);
 
 	//shape turbulance
-	mPosition.x += sin(mPosition.y/100.0 + time*20.0 )*turbFactor;
-	mPosition.z += cos(mPosition.y/100.0 + time*20.0 )*turbFactor;
+	mPosition.x += sin(mPosition.y/100.0 + time*20.0)*turbFactor;
+	mPosition.z += cos(mPosition.y/100.0 + time*20.0)*turbFactor;
 	
 	mPosition = modelViewMatrix * mPosition;
 

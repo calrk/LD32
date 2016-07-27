@@ -15,7 +15,6 @@ LD32.Loader = function(params){
 	loadImage('firefly', true);
 	loadImage('blood', true);
 	loadImage('newspaper', true);
-	loadImage('fire', true);
 
 	loadModel('torch');
 

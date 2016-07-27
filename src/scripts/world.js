@@ -370,4 +370,52 @@ LD32.World = function(params){
 		var floor = new THREE.Mesh(geo, floorMat);
 		return floor;
 	}
+
+	/*this.createWall = function(){
+		var geo = new THREE.BufferGeometry();
+
+		var vertexCount = 8;
+		var vertices = new Float32Array(vertexCount * 3);
+		vertices = Float32Array.from([
+						 1, -1,  1,
+						 1, -1, -1,
+						-1, -1, -1,
+						-1, -1,  1,
+				
+						 1, 1,  1,
+						 1, 1, -1,
+						-1, 1, -1,
+						-1, 1,  1]);
+		geo.addAttribute('position', new THREE.BufferAttribute(vertices, 3));
+
+		var indices = new Uint16Array(vertexCount * 3);
+		indices = Uint16Array.from([
+						0, 1, 5,
+						0, 5, 4,
+						1, 2, 6,
+						1, 6, 5,
+						2, 3, 7,
+						2, 7, 6,
+						3, 0, 4,
+						3, 4, 7]);
+		geo.setIndex(new THREE.BufferAttribute(indices, 1));
+
+		var uvs = new Float32Array(vertexCount * 2);
+		uvs = Float32Array.from([
+						0, 0, //0
+						0, 1, //1
+						0, 0, //2
+						0, 1, //3
+
+						1, 1, //4
+						1, 0, //5
+						1, 1, //6
+						1, 0, //7
+						]);
+		geo.addAttribute('uv', new THREE.BufferAttribute(uvs, 2));
+
+		geo.computeVertexNormals();
+		var floor = new THREE.Mesh(geo, floorMat);
+		return floor;
+	}*/
 }
