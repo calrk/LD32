@@ -119,6 +119,10 @@ var LD32 = {
 		$('#cardboard').hide();
 		this.mode = mode;
 		$('#' + this.mode).show();
+
+		/*if(this.mode == 'cardboard'){
+			this.setupSockets();
+		}*/
 	},
 
 	start: function(){
@@ -132,6 +136,7 @@ var LD32 = {
 		switch(this.mode){
 			case 'desktop':
 				$('#hud').show();
+				this.requestFullScreen.call(document.documentElement);
 				break;
 			case 'cardboard':
 				this.effect = new THREE.StereoEffect(this.renderer);
@@ -155,20 +160,46 @@ var LD32 = {
 	},
 
 	setupSockets: function(){
+		if(this.socket){
+			return;
+		}
+		var self = this;
+
 		this.socket = io.connect('https://server.clarklavery.com', {
 			'connect timeout': 5000,
 			secure: true
 		});
+
+		this.socket.on('connected', function(){
+			self.socket.emit('insectsGame');
+			console.log(self.socket);
+		});
+
 		this.p2p = new P2P(this.socket);
+		this.p2p.emit('peer-gesture', { action: 'set up'});
 
 		this.action = undefined;
-		this.p2p.on('peer-msg', function(data){
-			if(data.action == 'pinchin'){
+
+		this.p2p.on('peer-gesture', function(data){
+			console.log(data);
+
+			if(data.action == 'set up confirm'){
+				$('#connectionoff').hide();
+				$('#connectionon').show();
+			}
+			else if(data.action == 'pinchin'){
 				// cancelFullScreen.call(document);
 			}
 			else if(data.action == 'pinchout'){
-				startGame();
+				self.mode == 'cardboard';
+				// start();
 				// requestFullScreen.call(document.documentElement);
+				if(self.gameController.getGameState() == 'lost' || self.gameController.getGameState() == 'won'){
+					self.restart();
+				}
+				else if(self.gameController.getGameState() == 'setup'){
+					self.start();
+				}
 			}
 			else{
 				self.action = data.action;
@@ -252,7 +283,7 @@ var LD32 = {
 			top:top
 		});
 
-		// this.renderer.setSize(this.width, this.height);
+		this.renderer.setSize(this.width, this.height);
 
 		if(this.gameController){
 			this.gameController.player.camera.aspect = this.width / this.height;

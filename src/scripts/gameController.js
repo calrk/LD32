@@ -137,6 +137,9 @@ LD32.GameController = function(params){
 	this.setGameState = function(state){
 		gameState = state;
 	}
+	this.getGameState = function(){
+		return gameState;
+	}
 
 	this.spawnExplosion = function(position){
 		var explosion = new LD32.Explosion({
