@@ -32,17 +32,17 @@ var LD32 = {
 		this.renderer.setSize(this.width, this.height);
 		this.renderer.setClearColor(0x000000, 1.0);
 		// this.renderer.shadowMapEnabled = true;
-		
+
 		this.loader = new LD32.Loader();
 		this.shaderLoader = new LD32.Shader();
-		
+
 		this.stats = new Stats();
 		// this.stats.showPanel(0);
 		// document.body.appendChild(this.stats.dom);
 
 		this.clock = new THREE.Clock();
 		this.clock.start();
-		
+
 		this.textures = new LD32.Textures();
 		this.sounds = new LD32.Sounds();
 
@@ -155,6 +155,7 @@ var LD32 = {
 	},
 
 	setupSockets: function(){
+		var self = this;
 		this.socket = io.connect('https://server.clarklavery.com', {
 			'connect timeout': 5000,
 			secure: true
@@ -162,6 +163,10 @@ var LD32 = {
 		this.p2p = new P2P(this.socket);
 
 		this.action = undefined;
+		this.p2p.on('connected', function(data){
+			console.log('connected');
+		});
+
 		this.p2p.on('peer-msg', function(data){
 			if(data.action == 'pinchin'){
 				// cancelFullScreen.call(document);
@@ -171,6 +176,7 @@ var LD32 = {
 				// requestFullScreen.call(document.documentElement);
 			}
 			else{
+				console.log(data.action)
 				self.action = data.action;
 			}
 		});
@@ -221,33 +227,33 @@ var LD32 = {
 		}
 
 		$('#scene').css({
-			width: this.width+'px', 
+			width: this.width+'px',
 			height: this.height,
 			top:top
 		});
 
 		$('#canvas').css({
-			width: this.width+'px', 
+			width: this.width+'px',
 			height: this.height,
 			top:top
 		});
 		$('#hud').css({
-			width: this.width+'px', 
+			width: this.width+'px',
 			height: this.height,
 			top:top
 		});
 		$('#start').css({
-			width: this.width+'px', 
+			width: this.width+'px',
 			height: this.height,
 			top:top
 		});
 		$('#end').css({
-			width: this.width+'px', 
+			width: this.width+'px',
 			height: this.height,
 			top:top
 		});
 		$('#lost').css({
-			width: this.width+'px', 
+			width: this.width+'px',
 			height: this.height,
 			top:top
 		});

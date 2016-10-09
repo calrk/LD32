@@ -26,7 +26,7 @@ LD32.Player.prototype.createModel = function(){
 	this.camera.add(weaponJoint);
 
 	var weaponMat = new THREE.MeshLambertMaterial({
-		color: 0xffffff, 
+		color: 0xffffff,
 		map: LD32.textures.getTexture('newspaper'),
 	});
 	weaponMat.depthTest = false;
@@ -83,7 +83,7 @@ LD32.Player.prototype.rotatingAction = function(dt){
 	this.rotateAnim();
 
 	this.camera.quaternion.slerp(this.targetRot, smooth);
-	
+
 	if(this.interpPercent > 1){
 		this.state = 'still';
 	}
