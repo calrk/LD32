@@ -2,6 +2,7 @@ var gulp = require('gulp');
 var concat = require('gulp-concat');
 var uglify = require('gulp-uglify');
 var connect = require('gulp-connect');
+var cached = require('gulp-cached');
 var s3 = require('gulp-s3');
 var fs = require('fs');
 
@@ -17,8 +18,11 @@ var paths = {
 	controller: ['./src/controller/*']
 };
 
-gulp.task('default', ['js', 'html', 'resources', 'shaders', 'css', 'images', 'models', 'sounds', 'controller', 'connect', 'watch']);
-gulp.task('build', ['js']);
+gulp.task('default', ['build', 'connect', 'watch']);
+gulp.task('build', ['js', 'html', 'resources', 'shaders', 'css', 'images', 'models', 'sounds', 'controller']);
+gulp.task('live', ['build', 'watch', 'aws'], function(){
+	gulp.watch('./dist/**', ['aws']);
+});
 
 gulp.task('resources', function(){
 	gulp.src(paths.resources)
@@ -85,11 +89,20 @@ gulp.task('connect', function () {
 
 gulp.task('watch', function () {
 	gulp.watch(paths.js, ['js']);
+	gulp.watch(paths.resources, ['resources']);
+	gulp.watch(paths.shaders, ['shaders']);
+	gulp.watch(paths.css, ['css']);
+	gulp.watch(paths.images, ['images']);
+	gulp.watch(paths.models, ['models']);
+	gulp.watch(paths.sounds, ['sounds']);
+	gulp.watch(paths.html, ['html']);
+	gulp.watch(paths.controller, ['controller']);
 });
 
 gulp.task('aws', function(){
 	aws = JSON.parse(fs.readFileSync('./aws.json'));
 
 	gulp.src('./dist/**')
+		.pipe(cache('dist'))
 		.pipe(s3(aws));
 });

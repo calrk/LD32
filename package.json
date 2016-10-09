@@ -5,6 +5,7 @@
   "main": "main.js",
   "dependencies": {
     "gulp": "^3.9.1",
+    "gulp-cached": "^1.1.0",
     "gulp-concat": "^2.6.0",
     "gulp-connect": "^2.3.1",
     "gulp-s3": "^0.3.0",

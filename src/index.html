@@ -56,7 +56,7 @@
 			
 
 			<hr>
-			<p>Select your platform:</p>
+			<!-- <p>Select your platform:</p> -->
 			<span id='startButtons'>
 				<button onclick='LD32.setMode("desktop");'>
 					<img src="./images/desktop.png" width='64' height='64'>
@@ -151,6 +151,8 @@
 				</table>
 				<p>Rotate your head to look around</p>
 				<input type='button' value='Set up Controller' onclick='LD32.setupSockets()'>
+				<img id='connectionoff' src="images\noconnection.png" width='64'>
+				<img id='connectionon' class='hided' src="images\connection.png" width='64'>
 			</span>
 			<input id='playButt' type='button' value='Play' onclick='LD32.start()' style='display: none;'>
 
