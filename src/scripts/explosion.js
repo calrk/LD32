@@ -8,16 +8,18 @@ LD32.Explosion = function(params){
 	this.pointCloud;
 	this.lifeTime = 0;
 
-	this.bloodMaterial = new THREE.PointsMaterial({
-		color: 0xFF0000, 
+	this.init();
+}
+
+window.addEventListener('load', function(){
+	LD32.Explosion.bloodMaterial = new THREE.PointsMaterial({
+		color: 0xFF0000,
 		size: 0.1,
 		map: LD32.textures.getTexture('blood'),
 		blending: THREE.AdditiveBlending,
 		transparent: true
 	});
-
-	this.init();
-}
+});
 
 LD32.Explosion.prototype.init = function(){
 	var particles = new THREE.Geometry();
@@ -26,7 +28,7 @@ LD32.Explosion.prototype.init = function(){
 		particles.vertices.push(new THREE.Vector3(Math.random()*0.5-0.25, Math.random()*0.5-0.25, Math.random()*0.5-0.25));
 	}
 
-	this.pointCloud = new THREE.Points(particles, this.bloodMaterial);
+	this.pointCloud = new THREE.Points(particles, LD32.Explosion.bloodMaterial);
 	// pointCloud.sortParticles = true;
 	this.pointCloud.position.copy(this.position);
 	this.scene.add(this.pointCloud);

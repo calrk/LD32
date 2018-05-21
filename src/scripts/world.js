@@ -16,7 +16,7 @@ LD32.World = function(params){
 
 	var wallMat = new THREE.MeshLambertMaterial({
 		// shininess: 1,
-		color: 0xcb6e00, 
+		color: 0xcb6e00,
 		// specular: 0x444444,
 		map: LD32.textures.getTexture('wall'),
 		// normalMap: LD32.textures.getTexture('noiseNorm')
@@ -25,7 +25,7 @@ LD32.World = function(params){
 	var floorMat = wallMat;
 
 	var dustMaterial = new THREE.PointsMaterial({
-		color: 0x743f00, 
+		color: 0x743f00,
 		size: 0.1,
 		map: LD32.textures.getTexture('dust'),
 		blending: THREE.AdditiveBlending,
@@ -33,7 +33,7 @@ LD32.World = function(params){
 	});
 
 	var fireflyMaterial = new THREE.PointsMaterial({
-		color: 0x00aadd, 
+		color: 0x00aadd,
 		size: 0.1,
 		map: LD32.textures.getTexture('firefly'),
 		blending: THREE.AdditiveBlending,
@@ -87,7 +87,7 @@ LD32.World = function(params){
 
 	this.createWorld = function(){
 		world = new THREE.Object3D();
-		
+
 		//add outside walls
 		for(var i = 0; i < params.width+2; i++){
 			for(var j = 0; j < params.length+2; j++){
@@ -275,7 +275,10 @@ LD32.World = function(params){
 		matrix = mite.matrix;
 		mergeGeometry.merge(mite.geometry, matrix);
 
-		object = new THREE.Mesh(mergeGeometry, wallMat);
+		var buffer = new THREE.BufferGeometry();
+		buffer = buffer.fromGeometry(mergeGeometry);
+
+		object = new THREE.Mesh(buffer, wallMat);
 		object.rotation.y = Math.PI*Math.random()*2;
 		return object;
 	}
@@ -306,7 +309,7 @@ LD32.World = function(params){
 	}
 
 	this.createWall = function(){
-		var wall = new THREE.Mesh(new THREE.BoxGeometry(2, 2, 2), wallMat);
+		var wall = new THREE.Mesh(new THREE.BoxBufferGeometry(2, 2, 2), wallMat);
 		return wall;
 	}
 
@@ -339,7 +342,7 @@ LD32.World = function(params){
 						 1, -1, -1,
 						-1, -1, -1,
 						-1, -1,  1,
-				
+
 						 1, 1,  1,
 						 1, 1, -1,
 						-1, 1, -1,
@@ -381,7 +384,7 @@ LD32.World = function(params){
 						 1, -1, -1,
 						-1, -1, -1,
 						-1, -1,  1,
-				
+
 						 1, 1,  1,
 						 1, 1, -1,
 						-1, 1, -1,

@@ -30,7 +30,7 @@ LD32.Actor.prototype = {
 		this.scene.add(this.model);
 
 		this.initSelf();
-		
+
 		this.reset();
 	},
 	initSelf: function(){},
@@ -69,7 +69,7 @@ LD32.Actor.prototype = {
 		this.model.position.z = -2;//Math.floor(Math.random()*10)*2;
 		this.prevPos = this.model.position;
 		this.targetPos = this.model.position;
-		
+
 		this.model.rotation.x = this.model.rotation.y = this.model.rotation.z = 0;
 		this.forward = new THREE.Vector3(0, 0, -1);
 		this.right = new THREE.Vector3(1, 0, 0);
@@ -187,7 +187,7 @@ LD32.Actor.prototype = {
 		this.rotateAnim();
 
 		this.model.quaternion.slerp(this.targetRot, smooth);
-		
+
 		if(this.interpPercent > 1){
 			this.state = 'still';
 		}
@@ -309,7 +309,7 @@ LD32.Actor.prototype = {
 
 	createDiamond: function(size, mat){
 		if(this.diamondMesh){
-			var mesh = this.diamondMesh.clone();
+			var mesh = new THREE.Mesh(this.diamondMesh.geometry, mat);
 			mesh.scale.set(size[0], size[1], size[2]);
 			return mesh;
 		}
@@ -351,7 +351,10 @@ LD32.Actor.prototype = {
 
 		geo.computeFaceNormals();
 
-		var diamond = new THREE.Mesh(geo, mat);
+		var buffer = new THREE.BufferGeometry();
+		buffer = buffer.fromGeometry(geo);
+
+		var diamond = new THREE.Mesh(buffer, mat);
 		this.diamondMesh = diamond.clone();
 		diamond.scale.set(size[0], size[1], size[2]);
 		return diamond;
@@ -365,7 +368,7 @@ LD32.Actor.prototype = {
 	dieAnim: function(){},
 
 	interpolator: function(times, angles, currentTime){
-		var firstPos = 0; 
+		var firstPos = 0;
 		var secondPos = 1;
 
 		while(secondPos < times.length-1){

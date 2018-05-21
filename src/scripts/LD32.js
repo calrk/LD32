@@ -32,17 +32,17 @@ var LD32 = {
 		this.renderer.setSize(this.width, this.height);
 		this.renderer.setClearColor(0x000000, 1.0);
 		// this.renderer.shadowMapEnabled = true;
-		
+
 		this.loader = new LD32.Loader();
 		this.shaderLoader = new LD32.Shader();
-		
+
 		this.stats = new Stats();
 		// this.stats.showPanel(0);
 		// document.body.appendChild(this.stats.dom);
 
 		this.clock = new THREE.Clock();
 		this.clock.start();
-		
+
 		this.textures = new LD32.Textures();
 		this.sounds = new LD32.Sounds();
 
@@ -123,6 +123,29 @@ var LD32 = {
 		/*if(this.mode == 'cardboard'){
 			this.setupSockets();
 		}*/
+
+		switch(this.mode){
+			case 'desktop':
+				$('#hud').show();
+				this.requestFullScreen.call(document.documentElement);
+
+				this.hammertime.get('swipe').set({ direction: Hammer.DIRECTION_HORIZONTAL });
+				this.hammertime.get('pinch').set({ enable: false });
+				break;
+			case 'cardboard':
+			case 'mobile':
+				this.hammertime.get('swipe').set({ direction: Hammer.DIRECTION_ALL });
+				this.hammertime.get('pinch').set({ enable: true });
+				this.hammertime.on('pinchout', function(ev) {
+					self.noSleep.enable();
+					self.requestFullScreen.call(document.documentElement);
+				});
+				this.hammertime.on('pinchin', function(ev) {
+					self.noSleep.disable();
+					self.cancelFullScreen.call(document);
+				});
+				break;
+		}
 	},
 
 	start: function(){
@@ -144,17 +167,6 @@ var LD32 = {
 			case 'mobile':
 				this.requestFullScreen.call(document.documentElement);
 				this.noSleep.enable();
-
-				this.hammertime.get('swipe').set({ direction: Hammer.DIRECTION_ALL });
-				this.hammertime.get('pinch').set({ enable: true });
-				this.hammertime.on('pinchout', function(ev) {
-					self.noSleep.enable();
-					self.requestFullScreen.call(document.documentElement);
-				});
-				this.hammertime.on('pinchin', function(ev) {
-					self.noSleep.disable();
-					self.cancelFullScreen.call(document);
-				});
 				break;
 		}
 	},
@@ -252,38 +264,40 @@ var LD32 = {
 		}
 
 		$('#scene').css({
-			width: this.width+'px', 
+			width: this.width+'px',
 			height: this.height,
 			top:top
 		});
 
 		$('#canvas').css({
-			width: this.width+'px', 
+			width: this.width+'px',
 			height: this.height,
 			top:top
 		});
 		$('#hud').css({
-			width: this.width+'px', 
+			width: this.width+'px',
 			height: this.height,
 			top:top
 		});
 		$('#start').css({
-			width: this.width+'px', 
+			width: this.width+'px',
 			height: this.height,
 			top:top
 		});
 		$('#end').css({
-			width: this.width+'px', 
+			width: this.width+'px',
 			height: this.height,
 			top:top
 		});
 		$('#lost').css({
-			width: this.width+'px', 
+			width: this.width+'px',
 			height: this.height,
 			top:top
 		});
 
-		this.renderer.setSize(this.width, this.height);
+		if(this.renderer){
+			this.renderer.setSize(this.width, this.height);
+		}
 
 		if(this.gameController){
 			this.gameController.player.camera.aspect = this.width / this.height;

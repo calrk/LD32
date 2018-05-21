@@ -4,18 +4,18 @@ LD32.Textures = function(params){
 	var textureSettings = {};
 	var canvas = document.createElement('canvas');
 	var ctx = canvas.getContext('2d');
-	
+
 	canvas.width = canvas.height = 128;
 	var isReady = false;
 
 	this.ready = function(){
 		return isReady;
-	}
+	};
 
 	this.generate = function(){
 		console.log("Generating Textures...");
 		var frame = CLARITY.ctx.createImageData(canvas.width, canvas.height);
-		
+
 		var cloud = new CLARITY.Cloud({red:255, green:255, blue:255}).process(frame);
 		// cloud = new CLARITY.Blur({}).process(cloud);
 		var icloud = new CLARITY.Invert({}).process(cloud);
@@ -34,17 +34,20 @@ LD32.Textures = function(params){
 
 		console.log("Textures Generated.");
 		isReady = true;
-	}
+	};
 
 	function generateTexture(name, frame){
 		ctx.putImageData(frame, 0, 0);
-		
+
 		var img = canvas.toDataURL('image/png');
 		var imageSrc = document.createElement('img');
 
 		imageSrc.src = img;
 
-		textures[name] = new THREE.Texture();
+		if(!textures[name]){
+			textures[name] = new THREE.Texture();
+		}
+
 		textures[name].image = imageSrc;
 		if(textureSettings[name]){
 			if(textureSettings[name].wrap){
@@ -59,7 +62,7 @@ LD32.Textures = function(params){
 		setTimeout(function(){
 			textures[name].needsUpdate = true;
 		}, 1000);
-	}
+	};
 
 	this.addTexture = function(name, image){
 		textures[name] = new THREE.Texture();
@@ -75,11 +78,14 @@ LD32.Textures = function(params){
 		}
 
 		textures[name].needsUpdate = true;
-	}
+	};
 
 	this.getTexture = function(name){
+		if(!textures[name]){
+			textures[name] = new THREE.Texture();
+		}
 		return textures[name];
-	}
+	};
 
 	this.setOptions = function(params){
 		var params = params || {};
@@ -117,5 +123,5 @@ LD32.Textures = function(params){
 			x: 1,
 			y: 1
 		};
-	}
+	};
 }

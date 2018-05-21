@@ -2,3 +2,4 @@ dist
 node_modules
 aws.json
 bup
+s3 bup

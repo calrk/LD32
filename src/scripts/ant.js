@@ -9,6 +9,16 @@ LD32.Ant = function(params){
 
 LD32.Ant.prototype = Object.create(LD32.Actor.prototype);
 
+window.addEventListener('load', function(){
+	LD32.Ant.bodymat = new THREE.MeshLambertMaterial({
+		// metalness: 0.0,
+		// roughness: 0.0,
+		color: 0xA00000,
+		map: LD32.textures.getTexture('cloud'),
+	});
+	LD32.Ant.eyemat = new THREE.MeshLambertMaterial({color: 0x000000});
+});
+
 LD32.Ant.prototype.initSelf = function(){
 	this.idleTime = 1.25;
 }
@@ -31,15 +41,6 @@ LD32.Ant.prototype.resetSelf = function(){
 }
 
 LD32.Ant.prototype.createModel = function(){
-	this.antMat = new THREE.MeshLambertMaterial({color: 0x800000});
-	this.antMat = new THREE.MeshLambertMaterial({
-		// shininess: 1, 
-		color: 0xA00000, 
-		// specular: 0x444444, 
-		map: LD32.textures.getTexture('cloud'),
-		// normalMap: LD32.textures.getTexture('noiseNorm')
-	});
-	this.blackMat = new THREE.MeshLambertMaterial({color: 0x000000});
 	this.model = this.createBody();
 	this.model.position.y = -0.75;
 	this.model.scale.x = 0.35;
@@ -53,18 +54,18 @@ LD32.Ant.prototype.createModel = function(){
 	this.model.add(neck);
 
 	var head = this.createJoint(0);
-	var headMesh = this.createDiamond([0.5, 0.5, 0.5], this.antMat);
+	var headMesh = this.createDiamond([0.5, 0.5, 0.5], LD32.Ant.bodymat);
 	head.position.z = -0.25;
 	neck.add(head);
 	head.add(headMesh);
 
-	var eye1 = new THREE.Mesh(new THREE.SphereGeometry(0.1, 16, 16), this.blackMat);
+	var eye1 = new THREE.Mesh(new THREE.SphereGeometry(0.1, 16, 16), LD32.Ant.eyemat);
 	eye1.position.x = -0.15;
 	eye1.position.y = 0.15;
 	eye1.position.z = -0.15;
 	head.add(eye1);
 
-	var eye1 = new THREE.Mesh(new THREE.SphereGeometry(0.1, 16, 16), this.blackMat);
+	var eye1 = new THREE.Mesh(new THREE.SphereGeometry(0.1, 16, 16), LD32.Ant.eyemat);
 	eye1.position.x = 0.15;
 	eye1.position.y = 0.15;
 	eye1.position.z = -0.15;
@@ -77,7 +78,7 @@ LD32.Ant.prototype.createModel = function(){
 	abdomen.rotation.x = -Math.PI/6;
 	this.model.add(abdomen);
 
-	var abdo = this.createDiamond([1, 1, 1], this.antMat);
+	var abdo = this.createDiamond([1, 1, 1], LD32.Ant.bodymat);
 	abdo.position.z = 1;
 	abdomen.add(abdo);
 
@@ -87,7 +88,7 @@ LD32.Ant.prototype.createModel = function(){
 	mandy1.position.x = 0.5;
 	mandy1.rotation.y = -Math.PI/6;
 	head.add(mandy1);
-	var mandy1_1 = this.createDiamond([0.15, 0.15, 0.3], this.antMat);
+	var mandy1_1 = this.createDiamond([0.15, 0.15, 0.3], LD32.Ant.bodymat);
 	mandy1_1.position.z = -0.3;
 	mandy1.add(mandy1_1);
 	var mandy1_2 = this.createJoint(0);
@@ -96,7 +97,7 @@ LD32.Ant.prototype.createModel = function(){
 	mandy1_2.rotation.y = Math.PI/3;
 	mandy1_2.position.z = -0.6;
 	mandy1.add(mandy1_2);
-	var mandy1_3 = this.createDiamond([0.15, 0.15, 0.3], this.antMat);
+	var mandy1_3 = this.createDiamond([0.15, 0.15, 0.3], LD32.Ant.bodymat);
 	mandy1_3.position.z = -0.3;
 	mandy1_2 .add(mandy1_3);
 
@@ -106,7 +107,7 @@ LD32.Ant.prototype.createModel = function(){
 	mandy2.rotation.y = Math.PI/6;
 	mandy2.position.x = -0.5;
 	head.add(mandy2);
-	var mandy2_1 = this.createDiamond([0.15, 0.15, 0.3], this.antMat);
+	var mandy2_1 = this.createDiamond([0.15, 0.15, 0.3], LD32.Ant.bodymat);
 	mandy2_1.position.z = -0.3;
 	mandy2.add(mandy2_1);
 	var mandy2_2 = this.createJoint(0);
@@ -115,7 +116,7 @@ LD32.Ant.prototype.createModel = function(){
 	mandy2_2.rotation.y = -Math.PI/3;
 	mandy2_2.position.z = -0.6;
 	mandy2.add(mandy2_2);
-	var mandy2_3 = this.createDiamond([0.15, 0.15, 0.3], this.antMat);
+	var mandy2_3 = this.createDiamond([0.15, 0.15, 0.3], LD32.Ant.bodymat);
 	mandy2_3.position.z = -0.3;
 	mandy2_2 .add(mandy2_3);
 
@@ -213,7 +214,7 @@ LD32.Ant.prototype.createLeg = function(){
 	var hip = this.createJoint(0);
 	hip.rotation.z = -Math.PI/3;
 
-	var upperLeg = this.createDiamond([0.3, 0.15, 0.15], this.antMat);
+	var upperLeg = this.createDiamond([0.3, 0.15, 0.15], LD32.Ant.bodymat);
 	upperLeg.position.x = -0.3;
 	hip.add(upperLeg);
 
@@ -223,7 +224,7 @@ LD32.Ant.prototype.createLeg = function(){
 	knee.rotation.z = 2*Math.PI/3;
 	hip.add(knee);
 
-	var lowerLeg = this.createDiamond([0.6, 0.15, 0.15], this.antMat);
+	var lowerLeg = this.createDiamond([0.6, 0.15, 0.15], LD32.Ant.bodymat);
 	lowerLeg.position.x = -0.6;
 	knee.add(lowerLeg);
 
@@ -233,10 +234,10 @@ LD32.Ant.prototype.createLeg = function(){
 	ankle.rotation.z = -Math.PI/3;
 	knee.add(ankle);
 
-	var foot = this.createDiamond([0.15, 0.1, 0.1], this.blackMat);
+	var foot = this.createDiamond([0.15, 0.1, 0.1], LD32.Ant.eyemat);
 	foot.position.x = -0.15;
 	ankle.add(foot);
-	
+
 	var parent = new THREE.Object3D();
 	parent.add(hip);
 	parent.name = 'hip';
@@ -257,7 +258,7 @@ LD32.Ant.prototype.createBody = function(){
 	geo.vertices.push(new THREE.Vector3(0,    0.5, -0.5));
 	geo.vertices.push(new THREE.Vector3(-0.5, 0.5, 0));
 	geo.vertices.push(new THREE.Vector3(0,    0.5, 0.5));
-	
+
 	geo.vertices.push(new THREE.Vector3(0, 1, 0));
 
 	geo.faces.push(new THREE.Face3(0, 1, 4));
@@ -307,7 +308,10 @@ LD32.Ant.prototype.createBody = function(){
 	geo.faceVertexUvs[ 0 ].push( [ uvc, uvd, uve ] );
 	geo.faceVertexUvs[ 0 ].push( [ uvd, uvc, uve ] );
 
-	var mesh = new THREE.Mesh(geo, this.antMat);
+	var buffer = new THREE.BufferGeometry();
+	buffer = buffer.fromGeometry(geo);
+
+	var mesh = new THREE.Mesh(buffer, LD32.Ant.bodymat);
 	mesh.rotation.x = Math.PI/2;
 	var parent = new THREE.Object3D();
 	parent.add(mesh);

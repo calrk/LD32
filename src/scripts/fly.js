@@ -10,6 +10,21 @@ LD32.Fly = function(params){
 
 LD32.Fly.prototype = Object.create(LD32.Actor.prototype);
 
+window.addEventListener('load', function(){
+	LD32.Fly.bodymat = new THREE.MeshLambertMaterial({
+		color: 0x1b5c00,
+		map: LD32.textures.getTexture('cloud'),
+		// normalMap: LD32.textures.getTexture('noiseNorm')
+	});
+	LD32.Fly.eyemat = new THREE.MeshPhongMaterial({
+		shininess: 10,
+		color: 0x4c0000,
+		specular: 0x620000,
+		map: LD32.textures.getTexture('cloud'),
+		normalMap: LD32.textures.getTexture('noiseNorm')
+	});
+});
+
 LD32.Fly.prototype.initSelf = function(){
 	this.idleTime = 0.75;
 }
@@ -55,20 +70,6 @@ LD32.Fly.prototype.updateSelf = function(){
 }
 
 LD32.Fly.prototype.createModel = function(){
-	this.flyMat = new THREE.MeshLambertMaterial({
-		// shininess: 0.5, 
-		color: 0x1b5c00, 
-		// specular: 0x113700, 
-		map: LD32.textures.getTexture('cloud'),
-		// normalMap: LD32.textures.getTexture('noiseNorm')
-	});
-	this.eyeMat = new THREE.MeshPhongMaterial({
-		shininess: 10, 
-		color: 0x4c0000, 
-		specular: 0x620000, 
-		map: LD32.textures.getTexture('cloud'),
-		normalMap: LD32.textures.getTexture('noiseNorm')
-	});
 	this.blackMat = new THREE.MeshLambertMaterial({color: 0x000000});
 	this.model = this.createBody();
 	this.model.position.y = 0;
@@ -85,12 +86,12 @@ LD32.Fly.prototype.createModel = function(){
 	this.model.add(neck);
 
 	var head = this.createJoint(0);
-	var headMesh = this.createDiamond([0.5, 0.5, 0.5], this.flyMat);
+	var headMesh = this.createDiamond([0.5, 0.5, 0.5], LD32.Fly.bodymat);
 	head.position.z = -0.25;
 	neck.add(head);
 	head.add(headMesh);
 
-	var eye1 = new THREE.Mesh(new THREE.SphereGeometry(0.2, 16, 16), this.eyeMat);
+	var eye1 = new THREE.Mesh(new THREE.SphereGeometry(0.2, 16, 16), LD32.Fly.eyemat);
 	eye1.position.x = -0.2;
 	eye1.position.y = 0.17;
 	eye1.position.z = -0.17;
@@ -99,7 +100,7 @@ LD32.Fly.prototype.createModel = function(){
 	eye1.rotation.y = Math.PI/4;
 	head.add(eye1);
 
-	var eye2 = new THREE.Mesh(new THREE.SphereGeometry(0.2, 16, 16), this.eyeMat);
+	var eye2 = new THREE.Mesh(new THREE.SphereGeometry(0.2, 16, 16), LD32.Fly.eyemat);
 	eye2.position.x = 0.2;
 	eye2.position.y = 0.17;
 	eye2.position.z = -0.17;
@@ -116,7 +117,7 @@ LD32.Fly.prototype.createModel = function(){
 	abo.rotation.x = Math.PI/5;
 	this.model.add(abo);
 
-	var abdo = this.createDiamond([0.6, 0.6, 0.75], this.flyMat);
+	var abdo = this.createDiamond([0.6, 0.6, 0.75], LD32.Fly.bodymat);
 	abdo.position.z = 1;
 	abo.add(abdo);
 
@@ -268,7 +269,7 @@ LD32.Fly.prototype.createLeg = function(rotate){
 	}
 	hip.rotation.z = Math.PI/3;
 
-	var upperLeg = this.createDiamond([0.3, 0.15, 0.15], this.flyMat);
+	var upperLeg = this.createDiamond([0.3, 0.15, 0.15], LD32.Fly.bodymat);
 	upperLeg.position.x = -0.3;
 	hip.add(upperLeg);
 
@@ -278,7 +279,7 @@ LD32.Fly.prototype.createLeg = function(rotate){
 	knee.rotation.z = Math.PI/3;
 	hip.add(knee);
 
-	var lowerLeg = this.createDiamond([0.3, 0.15, 0.15], this.flyMat);
+	var lowerLeg = this.createDiamond([0.3, 0.15, 0.15], LD32.Fly.bodymat);
 	lowerLeg.position.x = -0.3;
 	knee.add(lowerLeg);
 
@@ -291,7 +292,7 @@ LD32.Fly.prototype.createLeg = function(rotate){
 	var foot = this.createDiamond([0.15, 0.1, 0.1], this.blackMat);
 	foot.position.x = -0.15;
 	ankle.add(foot);
-	
+
 	var parent = new THREE.Object3D();
 	parent.add(hip);
 	parent.name = 'hip';
@@ -353,7 +354,7 @@ LD32.Fly.prototype.createBody = function(){
 	geo.vertices.push(new THREE.Vector3(0, 0.5, -0.5));
 	geo.vertices.push(new THREE.Vector3(-0.5, 0.5, 0));
 	geo.vertices.push(new THREE.Vector3(0, 0.5, 0.5));
-	
+
 	geo.vertices.push(new THREE.Vector3(0, 1, 0));
 
 	geo.faces.push(new THREE.Face3(0, 1, 4));
@@ -403,7 +404,10 @@ LD32.Fly.prototype.createBody = function(){
 	geo.faceVertexUvs[ 0 ].push( [ uvc, uvd, uve ] );
 	geo.faceVertexUvs[ 0 ].push( [ uvd, uvc, uve ] );
 
-	var mesh = new THREE.Mesh(geo, this.flyMat);
+	var buffer = new THREE.BufferGeometry();
+	buffer = buffer.fromGeometry(geo);
+
+	var mesh = new THREE.Mesh(buffer, LD32.Fly.bodymat);
 	mesh.rotation.x = Math.PI/2;
 	var parent = new THREE.Object3D();
 	parent.add(mesh);
@@ -427,7 +431,7 @@ LD32.Fly.prototype.idleAnim = function(){
 LD32.Fly.prototype.attackAnim = function(){
 	this.hierarchy.model.rotation.x = Math.PI/6 + this.interpolator([0, 0.2, 0.6, 1], [0, -0.15, 0.25, 0], this.interpPercent);
 	this.hierarchy.model.position.z = this.interpolator([0, 0.2, 0.6, 1], [0, -0.25, -0.75, 0], this.interpPercent);
-		
+
 	this.hierarchy.leg1.rotation.z =              this.interpolator([0, 0.2, 0.4, 0.6, 1], [0, -0.2, 0.5, 0, 0], this.interpPercent);
 	this.hierarchy.leg2.rotation.z = Math.PI/12 + this.interpolator([0, 0.3, 0.5, 0.7, 1], [0, -0.2, 0.5, 0, 0], this.interpPercent);
 	this.hierarchy.leg3.rotation.z = Math.PI/8 +  this.interpolator([0, 0.4, 0.6, 0.8, 1], [0, -0.2, 0.5, 0, 0], this.interpPercent);
@@ -461,7 +465,7 @@ LD32.Fly.prototype.dieAnim = function(){
 
 	this.hierarchy.neck.rotation.x = this.interpolator([0, 1], [-Math.PI/6, 0], this.interpPercent);
 	this.hierarchy.abdomen.rotation.x = Math.PI/5 + this.interpolator([0, 1], [0, -0.15], this.interpPercent);
-	
+
 	this.hierarchy.wing1.rotation.x = -Math.PI/6 + this.interpolator([0, 1], [0, Math.PI/6], this.interpPercent);
 	this.hierarchy.wing2.rotation.x = -Math.PI/6 + this.interpolator([0, 1], [0, Math.PI/6], this.interpPercent);
 

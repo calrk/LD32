@@ -103,6 +103,6 @@ gulp.task('aws', function(){
 	aws = JSON.parse(fs.readFileSync('./aws.json'));
 
 	gulp.src('./dist/**')
-		.pipe(cache('dist'))
+		.pipe(cached('dist'))
 		.pipe(s3(aws));
 });
