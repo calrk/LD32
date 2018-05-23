@@ -184,6 +184,9 @@ var LD32 = {
 		this.p2p.emit('peer-gesture', { action: 'set up'});
 
 		this.action = undefined;
+		this.p2p.on('connected', function(data){
+			console.log('connected');
+		});
 
 		this.p2p.on('peer-gesture', data => {
 			console.log(data);
