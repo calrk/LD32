@@ -1,26 +1,21 @@
 
-LD32.Hud = function(params){
-	var self = this;
-	var health;
-	var insects;
+class Hud{
 
-	this.initHud = function(){
-		health = document.getElementById('healthHud');
-		insects = document.getElementById('insectsHud');
+	constructor () {
+		this.health = document.getElementById('healthHud');
+		this.insects = document.getElementById('insectsHud');
 	}
 
-	this.show = function(){
+	show () {
 		// $('#hud').show();
 	}
 
-	this.hide = function(){
+	hide () {
 		$('#hud').hide();
 	}
 
-	this.update = function(){
-		health.innerHTML = LD32.gameController.player.getHealth();
-		insects.innerHTML = LD32.gameController.getRemainingInsects();
+	update () {
+		this.health.innerHTML = LD32.gameController.player.getHealth();
+		this.insects.innerHTML = LD32.gameController.getRemainingInsects();
 	}
-
-	this.initHud();
 }

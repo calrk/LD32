@@ -15,9 +15,9 @@ var keys = {
 
 var keysDown = new Array();
 
-document.addEventListener('keydown', function(event) {
+document.addEventListener('keydown', event => {
 	keysDown[event.keyCode] = true;
-	
+
 	// console.log(event.keyCode);
 	if(event.keyCode == 90){
 		$('canvas').toggleClass('hided');
@@ -27,11 +27,11 @@ document.addEventListener('keydown', function(event) {
 	}
 });
 
-document.addEventListener('keyup', function(event) {
+document.addEventListener('keyup', event => {
 	keysDown[event.keyCode] = false;
 });
 
-/*window.oncontextmenu = function(event) {
+/*window.oncontextmenu = (event) => {
 	event.preventDefault();
 	event.stopPropagation();
 	return false;

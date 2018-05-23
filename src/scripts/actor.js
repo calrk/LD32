@@ -1,69 +1,62 @@
-LD32.Actor = function(params){
-	params = params || {};
-	this.gameController = params.gameController;
-	this.scene = params.scene;
-};
+class Actor{
 
-LD32.Actor.prototype = {
-	model : new THREE.Object3D(),
-	state : 'still',
-	health : 100,
+	constructor (params) {
+		params = params || {};
+		this.gameController = params.gameController;
+		this.scene = params.scene;
+		this.model = new THREE.Object3D();
+		this.state = 'still';
+		this.health = 100;
 
-	forward : new THREE.Vector3(0, 0, -1),
-	right : new THREE.Vector3(1, 0, 0),
+		this.forward = new THREE.Vector3(0, 0, -1);
+		this.right = new THREE.Vector3(1, 0, 0);
 
-	MathV : new THREE.Vector3(),
-	MathQ : new THREE.Quaternion(),
+		this.MathV = new THREE.Vector3();
+		this.MathQ = new THREE.Quaternion();
 
-	lastMoveTime : 0,
-	idleTime : 1,
-	prevPos : 0,
-	targetPos : 0,
-	prevEuler : new THREE.Euler(0, 0, 0, 'XYZ'),
-	targetRot : 0,
-	interpPercent : 0,
-	takeDamageSound : undefined,
-	dieSound : undefined,
+		this.lastMoveTime = 0;
+		this.idleTime = 1;
+		this.prevPos = 0;
+		this.targetPos = 0;
+		this.prevEuler = new THREE.Euler(0, 0, 0, 'XYZ');
+		this.targetRot = 0;
+		this.interpPercent = 0;
+		this.takeDamageSound = undefined;
+		this.dieSound = undefined;
+	}
 
-	init: function(){
+	init(){
 		this.createModel();
 		this.scene.add(this.model);
-
-		this.initSelf();
-
 		this.reset();
-	},
-	initSelf: function(){},
+	}
 
-	takeDamage : function(damage){
+	takeDamage (damage) {
 		this.health -= damage || 10;
 		this.gameController.spawnExplosion(this.model.position);
-		var self = this;
 		if(this.takeDamageSound){
-			setTimeout(function(){
-				LD32.sounds.play(self.takeDamageSound);
+			setTimeout(() => {
+				LD32.sounds.play(this.takeDamageSound);
 			}, 150);
 		}
-		this.takeDamageSelf();
-	},
-	takeDamageSelf: function(){},
-	die : function(){
-		var self = this;
-		if(this.dieSound){
-			setTimeout(function(){
-				LD32.sounds.play(self.dieSound);
-			}, 150);
-		}
-	},
+	}
 
-	setPosition: function(x, z){
+	die () {
+		if(this.dieSound){
+			setTimeout(() => {
+				LD32.sounds.play(this.dieSound);
+			}, 150);
+		}
+	}
+
+	setPosition(x, z){
 		this.model.position.x = x*2;
 		this.model.position.z = z*2;
 		this.prevPos = this.model.position;
 		this.targetPos = this.model.position;
-	},
+	}
 
-	reset : function(){
+	reset (){
 		this.health = 100;
 		this.model.position.x = -2;//Math.floor(Math.random()*10)*2;
 		this.model.position.z = -2;//Math.floor(Math.random()*10)*2;
@@ -76,15 +69,13 @@ LD32.Actor.prototype = {
 		this.prevEuler = new THREE.Euler(0, 0, 0, 'XYZ');
 
 		this.state = 'still';
-		this.resetSelf();
-	},
-	resetSelf: function(){},
+	}
 
-	createModel : function(){
+	createModel (){
 		this.model = new THREE.Mesh(new THREE.SphereGeometry(0.5, 16, 16), new THREE.MeshLambertMaterial({color:0x0000FF}));
-	},
+	}
 
-	update : function(dt){
+	update (dt){
 		if(this.isAlive()){
 			switch(this.state){
 				case 'still':
@@ -103,7 +94,6 @@ LD32.Actor.prototype = {
 					this.attackingAction(dt);
 					break;
 			}
-			this.updateSelf();
 		}
 		else{
 			if(this.state != 'dead'){
@@ -113,10 +103,9 @@ LD32.Actor.prototype = {
 			}
 			this.dyingAction(dt);
 		}
-	},
-	updateSelf: function(){},
+	}
 
-	stillAction : function(dt){
+	stillAction (dt){
 		this.lastMoveTime += dt;
 		this.interpPercent += dt;
 		if(this.interpPercent > 1){
@@ -146,9 +135,9 @@ LD32.Actor.prototype = {
 			}
 			this.lastMoveTime = 0;
 		}
-	},
+	}
 
-	movingAction : function(dt, speed){
+	movingAction (dt, speed){
 		var speed = speed || 2.5;
 		this.interpPercent += dt*speed;
 		if(this.interpPercent > 1){
@@ -166,9 +155,9 @@ LD32.Actor.prototype = {
 			this.prevPos = this.targetPos;
 			this.state = 'still';
 		}
-	},
+	}
 
-	movingFailAction : function(dt){
+	movingFailAction (dt){
 		this.interpPercent += dt*5;
 		this.walkFailAnim();
 
@@ -179,9 +168,9 @@ LD32.Actor.prototype = {
 			this.targetPos = this.prevPos;
 			this.state = 'still';
 		}
-	},
+	}
 
-	rotatingAction : function(dt){
+	rotatingAction (dt){
 		this.interpPercent += dt*2;
 		var smooth = THREE.Math.smoothstep(this.interpPercent, 0, 1);
 		this.rotateAnim();
@@ -191,9 +180,9 @@ LD32.Actor.prototype = {
 		if(this.interpPercent > 1){
 			this.state = 'still';
 		}
-	},
+	}
 
-	attackingAction : function(dt){
+	attackingAction (dt){
 		this.interpPercent += dt*3;
 		this.attackAnim();
 
@@ -204,24 +193,24 @@ LD32.Actor.prototype = {
 			this.targetPos = this.prevPos;
 			this.state = 'still';
 		}
-	},
+	}
 
-	dyingAction : function(dt){
+	dyingAction (dt){
 		if(this.interpPercent < 1){
 			this.interpPercent += dt;
 			this.dieAnim();
 		}
-	},
+	}
 
-	getModel : function(){
+	getModel (){
 		return this.model;
-	},
+	}
 
-	isAlive : function(){
+	isAlive (){
 		return this.health > 0;
-	},
+	}
 
-	setMove : function(target){
+	setMove (target){
 		var forwards = false;
 		if(target.equals(this.forward)){
 			forwards = true;
@@ -252,13 +241,13 @@ LD32.Actor.prototype = {
 			this.state = 'attacking';
 			return result;
 		}
-	},
+	}
 
-	spacesOccupied : function(){
+	spacesOccupied (){
 		return [this.prevPos, this.targetPos];
-	},
+	}
 
-	setRotation : function(target){
+	setRotation (target){
 		var euler = new THREE.Euler(0, Math.PI/2*target, 0, 'XYZ');
 		this.prevEuler = new THREE.Euler(0, this.prevEuler.y+Math.PI/2*target, 0, 'XYZ');
 
@@ -272,13 +261,13 @@ LD32.Actor.prototype = {
 
 		this.interpPercent = 0;
 		this.state = 'rotating';
-	},
+	}
 
-	getHealth : function(){
+	getHealth (){
 		return this.health;
-	},
+	}
 
-	createJoint: function(length){
+	createJoint(length){
 		if(length == 0){
 			return new THREE.Object3D();
 		}
@@ -305,69 +294,20 @@ LD32.Actor.prototype = {
 
 			return axes;
 		}
-	},
+	}
 
-	createDiamond: function(size, mat){
-		if(this.diamondMesh){
-			var mesh = new THREE.Mesh(this.diamondMesh.geometry, mat);
-			mesh.scale.set(size[0], size[1], size[2]);
-			return mesh;
-		}
-		var geo = new THREE.Geometry();
-		var mat = mat || new THREE.MeshLambertMaterial({color: 0x800000});
+	createDiamond(size, mat){
+		return LD32.geometry.createDiamond(size, mat);
+	}
 
-		geo.vertices.push(new THREE.Vector3(1, 0, 0));
-		geo.vertices.push(new THREE.Vector3(-1, 0, 0));
-		geo.vertices.push(new THREE.Vector3(0, 1, 0));
-		geo.vertices.push(new THREE.Vector3(0, -1, 0));
-		geo.vertices.push(new THREE.Vector3(0, 0, 1));
-		geo.vertices.push(new THREE.Vector3(0, 0, -1));
+	idleAnim(){}
+	walkAnim(){}
+	walkFailAnim(){}
+	rotateAnim(){}
+	attackAnim(){}
+	dieAnim(){}
 
-		geo.faces.push(new THREE.Face3(0, 2, 4));
-		geo.faces.push(new THREE.Face3(0, 4, 3));
-		geo.faces.push(new THREE.Face3(0, 3, 5));
-		geo.faces.push(new THREE.Face3(0, 5, 2));
-
-		geo.faces.push(new THREE.Face3(1, 2, 5));
-		geo.faces.push(new THREE.Face3(1, 5, 3));
-		geo.faces.push(new THREE.Face3(1, 3, 4));
-		geo.faces.push(new THREE.Face3(1, 4, 2));
-
-		var uva = new THREE.Vector2(0, 0);
-		var uvb = new THREE.Vector2(0, 1);
-		var uvc = new THREE.Vector2(1, 1);
-		var uvd = new THREE.Vector2(1, 0);
-		var uve = new THREE.Vector2(0.5, 0.5);
-
-		geo.faceVertexUvs[ 0 ].push( [ uvc, uve, uvb ] );
-		geo.faceVertexUvs[ 0 ].push( [ uvc, uvb, uve ] );
-		geo.faceVertexUvs[ 0 ].push( [ uvc, uve, uvd ] );
-		geo.faceVertexUvs[ 0 ].push( [ uvc, uvd, uve ] );
-
-		geo.faceVertexUvs[ 0 ].push( [ uva, uve, uvd ] );
-		geo.faceVertexUvs[ 0 ].push( [ uva, uvd, uve ] );
-		geo.faceVertexUvs[ 0 ].push( [ uva, uve, uvb ] );
-		geo.faceVertexUvs[ 0 ].push( [ uva, uvb, uve ] );
-
-		geo.computeFaceNormals();
-
-		var buffer = new THREE.BufferGeometry();
-		buffer = buffer.fromGeometry(geo);
-
-		var diamond = new THREE.Mesh(buffer, mat);
-		this.diamondMesh = diamond.clone();
-		diamond.scale.set(size[0], size[1], size[2]);
-		return diamond;
-	},
-
-	idleAnim: function(){},
-	walkAnim: function(){},
-	walkFailAnim: function(){},
-	rotateAnim: function(){},
-	attackAnim: function(){},
-	dieAnim: function(){},
-
-	interpolator: function(times, angles, currentTime){
+	interpolator(times, angles, currentTime){
 		var firstPos = 0;
 		var secondPos = 1;
 

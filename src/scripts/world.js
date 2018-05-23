@@ -1,117 +1,117 @@
 
-LD32.World = function(params){
-	var world = new THREE.Object3D();
-	var content = [];
-	for(var i = 0; i < params.width+2; i++){
-		content[i] = [];
-	}
-	var dustSystems = [];
-	var fireflies = [];
-	var torches = [];
-	var fireEmbers = undefined;
+class World{
 
-	var params = params || {};
-	var length = params.length || 100;
-	var width = params.width || 20;
+	constructor (params) {
+		var params = params || {};
+		this.length = params.length || 100;
+		this.width = params.width || 20;
 
-	var wallMat = new THREE.MeshLambertMaterial({
-		// shininess: 1,
-		color: 0xcb6e00,
-		// specular: 0x444444,
-		map: LD32.textures.getTexture('wall'),
-		// normalMap: LD32.textures.getTexture('noiseNorm')
-	});
-	var ceilMat = wallMat;
-	var floorMat = wallMat;
-
-	var dustMaterial = new THREE.PointsMaterial({
-		color: 0x743f00,
-		size: 0.1,
-		map: LD32.textures.getTexture('dust'),
-		blending: THREE.AdditiveBlending,
-		transparent: true
-	});
-
-	var fireflyMaterial = new THREE.PointsMaterial({
-		color: 0x00aadd,
-		size: 0.1,
-		map: LD32.textures.getTexture('firefly'),
-		blending: THREE.AdditiveBlending,
-		transparent: true
-	});
-
-	var fireUniforms = {
-		tHeightMap:  { type: "t",  value: LD32.textures.getTexture('cloud') },
-		uColor: { type: "c", value: new THREE.Color( 0xff4800 ) },
-		time: { type: "f", value: 0.0 },
-	};
-
-	var displacementMaterial = new THREE.ShaderMaterial({
-		transparent:	true,
-		uniforms: fireUniforms,
-		vertexShader:	LD32.shaderLoader.getShader('fire_vertex'),
-		fragmentShader: LD32.shaderLoader.getShader('fire_fragment')
-	});
-
-	this.reset = function(){
-		content = [];
-		for(var i = 0; i < params.width+2; i++){
-			content[i] = [];
+		this.world = new THREE.Object3D();
+		this.content = [];
+		for(var i = 0; i < this.width+2; i++){
+			this.content[i] = [];
 		}
-		dustSystems = [];
-		fireflies = [];
-		torches = [];
+		this.dustSystems = [];
+		this.fireflies = [];
+		this.torches = [];
+
+		this.wallMat = new THREE.MeshLambertMaterial({
+			color: 0xcb6e00,
+			map: LD32.textures.getTexture('wall'),
+			// normalMap: LD32.textures.getTexture('noiseNorm')
+		});
+		this.ceilMat = this.wallMat;
+		this.floorMat = this.wallMat;
+
+		this.dustMaterial = new THREE.PointsMaterial({
+			color: 0x743f00,
+			size: 0.1,
+			map: LD32.textures.getTexture('dust'),
+			blending: THREE.AdditiveBlending,
+			transparent: true
+		});
+
+		this.fireflyMaterial = new THREE.PointsMaterial({
+			color: 0x00aadd,
+			size: 0.1,
+			map: LD32.textures.getTexture('firefly'),
+			blending: THREE.AdditiveBlending,
+			transparent: true
+		});
+
+		this.fireUniforms = {
+			tHeightMap:  { type: "t",  value: LD32.textures.getTexture('cloud') },
+			uColor: { type: "c", value: new THREE.Color( 0xff4800 ) },
+			time: { type: "f", value: 0.0 },
+		};
+
+		this.displacementMaterial = new THREE.ShaderMaterial({
+			transparent:	true,
+			uniforms: this.fireUniforms,
+			vertexShader:	LD32.shaderLoader.getShader('fire_vertex'),
+			fragmentShader: LD32.shaderLoader.getShader('fire_fragment')
+		});
 	}
 
-	this.update = function(dt){
-		for(var i = 0; i < dustSystems.length; i++){
-			dustSystems[i].position.y = Math.sin(LD32.clock.elapsedTime/10+dustSystems[i].offset);
+	reset () {
+		this.content = [];
+		for(var i = 0; i < this.width+2; i++){
+			this.content[i] = [];
+		}
+		this.dustSystems = [];
+		this.fireflies = [];
+		this.torches = [];
+	}
+
+	update (dt){
+		for(var i = 0; i < this.dustSystems.length; i++){
+			this.dustSystems[i].position.y = Math.sin(LD32.clock.elapsedTime/10+this.dustSystems[i].offset);
 		}
 
-		for(var i = 0; i < fireflies.length; i++){
-			fireflies[i].light.intensity = Math.sin(LD32.clock.elapsedTime*4)*0.2+0.9;
+		for(var i = 0; i < this.fireflies.length; i++){
+			this.fireflies[i].light.intensity = Math.sin(LD32.clock.elapsedTime*4)*0.2+0.9;
 
-			fireflies[i].geometry.vertices.forEach(function(vertex){
+			this.fireflies[i].geometry.vertices.forEach(vertex => {
 				vertex.x = Math.sin(LD32.clock.elapsedTime/2 + vertex.offsetx)*vertex.offsetxdist;
 				vertex.y = Math.sin(LD32.clock.elapsedTime/2 + vertex.offsety)*vertex.offsetydist;
 				vertex.z = Math.sin(LD32.clock.elapsedTime/2 + vertex.offsetz)*vertex.offsetzdist;
 			});
-			fireflies[i].geometry.verticesNeedUpdate = true;
+			this.fireflies[i].geometry.verticesNeedUpdate = true;
 		}
 
-		for(var i = 0; i < torches.length; i++){
-			torches[i].light.intensity = Math.sin(LD32.clock.elapsedTime*16)*0.2+0.9;
+		for(var i = 0; i < this.torches.length; i++){
+			this.torches[i].light.intensity = Math.sin(LD32.clock.elapsedTime*16)*0.2+0.9;
 		}
-		fireUniforms.time.value += dt;
+		this.fireUniforms.time.value += dt;
 	}
 
-	this.createWorld = function(){
-		world = new THREE.Object3D();
+	createWorld () {
+		this.world = new THREE.Object3D();
 
 		//add outside walls
-		for(var i = 0; i < params.width+2; i++){
-			for(var j = 0; j < params.length+2; j++){
-				if(i == 0 || i == params.width+1 || j == 0 || j == params.length+1){
+		for(var i = 0; i < this.width+2; i++){
+			for(var j = 0; j < this.length+2; j++){
+				if(i == 0 || i == this.width+1 || j == 0 || j == this.length+1){
 					var wall = this.createWall();
 					wall.position.x = 2*i;
 					wall.position.z = 2*j;
-					world.add(wall);
-					content[i][j] = 1;
+					this.world.add(wall);
+					this.content[i][j] = 1;
 				}
 				else{
 					var wall = this.createEmpty();
 					wall.position.x = 2*i;
 					wall.position.z = 2*j;
-					world.add(wall);
-					content[i][j] = 0;
+					this.world.add(wall);
+					this.content[i][j] = 0;
 				}
 				// var val = simplex.noise3D(geometry.vertices[i].x/2, geometry.vertices[i].y/2, geometry.vertices[i].z/2);
 			}
 		}
 
 		//add inside walls
-		for(var i = 0; i < params.width+1; i+=2){
-			for(var j = 0; j < params.length+1; j+=2){
+		for(var i = 0; i < this.width+1; i+=2){
+			for(var j = 0; j < this.length+1; j+=2){
 				if(i < 3 && j < 3){
 					continue;
 				}
@@ -131,8 +131,8 @@ LD32.World = function(params){
 				}
 				wall.position.x = 2*(i + x);
 				wall.position.z = 2*(j + y);
-				world.add(wall);
-				content[i+x][j+y] = 1;
+				this.world.add(wall);
+				this.content[i+x][j+y] = 1;
 			}
 		}
 
@@ -140,15 +140,15 @@ LD32.World = function(params){
 		for(var j = 0; j < 5; j++){
 			var dusts = new THREE.Geometry();
 			for(var i = 0; i < 50; i++){
-				dusts.vertices.push(new THREE.Vector3(Math.random()*params.width*2, Math.random()*2-1, Math.random()*params.length*2));
+				dusts.vertices.push(new THREE.Vector3(Math.random()*this.width*2, Math.random()*2-1, Math.random()*this.length*2));
 			}
 
-			dustSystems[j] = new THREE.Points(dusts, dustMaterial);
-			dustSystems[j].offset = Math.random()*Math.PI*2;
-			world.add(dustSystems[j]);
+			this.dustSystems[j] = new THREE.Points(dusts, this.dustMaterial);
+			this.dustSystems[j].offset = Math.random()*Math.PI*2;
+			this.world.add(this.dustSystems[j]);
 		}
 
-		//add fireflies
+		//add this.fireflies
 		for(var j = 0; j < 5; j++){
 			var fireflyParticles = new THREE.Geometry();
 			for(var i = 0; i < 10; i++){
@@ -160,35 +160,35 @@ LD32.World = function(params){
 				fireflyParticles.vertices[i].offsetydist = Math.random()*2-1;
 				fireflyParticles.vertices[i].offsetzdist = Math.random()*2-1;
 			}
-			var firefly = new THREE.Points(fireflyParticles, fireflyMaterial);
+			var firefly = new THREE.Points(fireflyParticles, this.fireflyMaterial);
 
-			firefly.position.x = Math.floor(Math.random()*params.width);
-			firefly.position.z = Math.floor(Math.random()*params.length);
+			firefly.position.x = Math.floor(Math.random()*this.width);
+			firefly.position.z = Math.floor(Math.random()*this.length);
 			while(!this.canMove(firefly.position.x, firefly.position.z)){
-				firefly.position.x = Math.floor(Math.random()*params.width);
-				firefly.position.z = Math.floor(Math.random()*params.length);
+				firefly.position.x = Math.floor(Math.random()*this.width);
+				firefly.position.z = Math.floor(Math.random()*this.length);
 			}
 			firefly.position.x *= 2;
 			firefly.position.z *= 2;
-			world.add(firefly);
+			this.world.add(firefly);
 
 			var light = new THREE.PointLight(0x00ddff, 0.5, 3);
 			light.position.y = 0.5;
 			firefly.add(light);
 			firefly.light = light;
-			fireflies.push(firefly);
+			this.fireflies.push(firefly);
 		}
 
-		//add torches
+		//add this.torches
 		for(var j = 0; j < 5; j++){
 			var torchHolder = new THREE.Object3D();
 			var torch = LD32.loader.getModel('torch');
 
-			torchHolder.position.x = Math.floor(Math.random()*params.width);
-			torchHolder.position.z = Math.floor(Math.random()*params.length);
+			torchHolder.position.x = Math.floor(Math.random()*this.width);
+			torchHolder.position.z = Math.floor(Math.random()*this.length);
 			while(!this.canMove(torchHolder.position.x, torchHolder.position.z)){
-				torchHolder.position.x = Math.floor(Math.random()*params.width);
-				torchHolder.position.z = Math.floor(Math.random()*params.length);
+				torchHolder.position.x = Math.floor(Math.random()*this.width);
+				torchHolder.position.z = Math.floor(Math.random()*this.length);
 			}
 			torchHolder.position.x *= 2;
 			torchHolder.position.z *= 2;
@@ -199,7 +199,7 @@ LD32.World = function(params){
 
 			torch.scale.set(25,25,25);
 
-			world.add(torchHolder);
+			this.world.add(torchHolder);
 			torchHolder.add(torch);
 			var light = new THREE.PointLight(0xff8800, 0.5, 3);
 			light.position.y = 0.7;
@@ -210,15 +210,25 @@ LD32.World = function(params){
 			fire.position.y = 1.05;
 			torchHolder.add(fire);
 
-			torches.push(torchHolder);
+			this.torches.push(torchHolder);
 		}
 	}
 
-	this.createStalagmite = function(){
+	createStalagmite () {
 		var mergeGeometry = new THREE.Geometry();
 		var scale = Math.random()*0.4+0.8;
 
-		var mite = new THREE.Mesh(new THREE.ConeGeometry( 0.25*scale, 1.5*scale, 32), wallMat);
+		var mite = new THREE.Mesh(new THREE.ConeGeometry( 0.25*scale, 1.5*scale, 32), this.wallMat);
+		mite.rotation.y = Math.PI*Math.random()*2;
+		mite.position.x = Math.random()*1.5-0.75;
+		mite.position.y = -(2-1.5*scale)/2;
+		mite.position.z = Math.random()*1.5-0.75;
+		mite.matrixAutoUpdate && mite.updateMatrix();
+		var matrix = mite.matrix;
+		mergeGeometry.merge(mite.geometry, matrix);
+
+		scale = Math.random()*0.2+0.9;
+		mite = new THREE.Mesh(new THREE.ConeGeometry(0.25*scale, 1.5*scale, 32 ), this.wallMat);
 		mite.rotation.y = Math.PI*Math.random()*2;
 		mite.position.x = Math.random()*1.5-0.75;
 		mite.position.y = -(2-1.5*scale)/2;
@@ -228,17 +238,7 @@ LD32.World = function(params){
 		mergeGeometry.merge(mite.geometry, matrix);
 
 		scale = Math.random()*0.2+0.9;
-		mite = new THREE.Mesh(new THREE.ConeGeometry(0.25*scale, 1.5*scale, 32 ), wallMat);
-		mite.rotation.y = Math.PI*Math.random()*2;
-		mite.position.x = Math.random()*1.5-0.75;
-		mite.position.y = -(2-1.5*scale)/2;
-		mite.position.z = Math.random()*1.5-0.75;
-		mite.matrixAutoUpdate && mite.updateMatrix();
-		matrix = mite.matrix;
-		mergeGeometry.merge(mite.geometry, matrix);
-
-		scale = Math.random()*0.2+0.9;
-		mite = new THREE.Mesh(new THREE.ConeGeometry(0.125*scale, 0.5*scale, 32 ), wallMat);
+		mite = new THREE.Mesh(new THREE.ConeGeometry(0.125*scale, 0.5*scale, 32 ), this.wallMat);
 		mite.rotation.y = Math.PI*Math.random()*2;
 		mite.position.x = Math.random()*1.5-0.75;
 		mite.position.y = -(2-0.5*scale)/2;
@@ -248,7 +248,7 @@ LD32.World = function(params){
 		mergeGeometry.merge(mite.geometry, matrix);
 
 		scale = Math.random()*0.2+0.9;
-		mite = new THREE.Mesh(new THREE.ConeGeometry(0.125*scale, 0.5*scale, 32 ), wallMat);
+		mite = new THREE.Mesh(new THREE.ConeGeometry(0.125*scale, 0.5*scale, 32 ), this.wallMat);
 		mite.rotation.y = Math.PI*Math.random()*2;
 		mite.position.x = Math.random()*1.5-0.75;
 		mite.position.y = -(2-0.5*scale)/2;
@@ -257,7 +257,7 @@ LD32.World = function(params){
 		matrix = mite.matrix;
 		mergeGeometry.merge(mite.geometry, matrix);
 
-		mite = new THREE.Mesh(new THREE.ConeGeometry(0.125*scale, 0.25*scale, 32 ), wallMat);
+		mite = new THREE.Mesh(new THREE.ConeGeometry(0.125*scale, 0.25*scale, 32 ), this.wallMat);
 		mite.rotation.y = Math.PI*Math.random()*2;
 		mite.position.x = Math.random()*1.5-0.75;
 		mite.position.y = -(2-0.25*scale)/2;
@@ -266,7 +266,7 @@ LD32.World = function(params){
 		matrix = mite.matrix;
 		mergeGeometry.merge(mite.geometry, matrix);
 
-		mite = new THREE.Mesh(new THREE.SphereGeometry( 1, 16, 16 ), wallMat);
+		mite = new THREE.Mesh(new THREE.SphereGeometry( 1, 16, 16 ), this.wallMat);
 		mite.rotation.y = Math.PI*Math.random()*2;
 		mite.position.x = Math.random()*0.5-0.25;
 		mite.position.y = -1.75;
@@ -278,17 +278,17 @@ LD32.World = function(params){
 		var buffer = new THREE.BufferGeometry();
 		buffer = buffer.fromGeometry(mergeGeometry);
 
-		object = new THREE.Mesh(buffer, wallMat);
+		var object = new THREE.Mesh(buffer, this.wallMat);
 		object.rotation.y = Math.PI*Math.random()*2;
 		return object;
 	}
 
-	this.createStalagtite = function(){
+	createStalagtite () {
 		var object = this.createStalagmite();
 		object.rotation.x = Math.PI;
 
 		var scale = Math.random()*0.2+0.9;
-		var mite = new THREE.Mesh(new THREE.ConeGeometry(0.125*scale, 0.5*scale, 32 ), wallMat);
+		var mite = new THREE.Mesh(new THREE.ConeGeometry(0.125*scale, 0.5*scale, 32 ), this.wallMat);
 		mite.rotation.y = Math.PI*Math.random()*2;
 		mite.position.x = Math.random()*1-0.5;
 		mite.position.y = (2-0.5*scale)/2;
@@ -297,7 +297,7 @@ LD32.World = function(params){
 		object.add(mite);
 
 		scale = Math.random()*0.2+0.9;
-		mite = new THREE.Mesh(new THREE.ConeGeometry(0.125*scale, 0.75*scale, 32 ), wallMat);
+		mite = new THREE.Mesh(new THREE.ConeGeometry(0.125*scale, 0.75*scale, 32 ), this.wallMat);
 		mite.rotation.y = Math.PI*Math.random()*2;
 		mite.position.x = Math.random()*1-0.5;
 		mite.position.y = (2-0.75*scale)/2;
@@ -308,31 +308,31 @@ LD32.World = function(params){
 		return object;
 	}
 
-	this.createWall = function(){
-		var wall = new THREE.Mesh(new THREE.BoxBufferGeometry(2, 2, 2), wallMat);
+	createWall () {
+		var wall = new THREE.Mesh(new THREE.BoxBufferGeometry(2, 2, 2), this.wallMat);
 		return wall;
 	}
 
-	this.canMove = function(i, j){
+	canMove (i , j){
 		if(i < 0 || j < 0){
 			return false;
 		}
-		if(!content[i][j]){
+		if(!this.content[i][j]){
 			return true;
 		}
 	}
 
-	this.World = function(){
-		return world;
+	World () {
+		return this.world;
 	}
 
-	this.createFire = function(){
-		// mesh = new THREE.Mesh(new THREE.SphereGeometry( 0.1, 32, 32 ), displacementMaterial);
-		mesh = new THREE.Mesh(new THREE.IcosahedronGeometry(0.1, 3), displacementMaterial);
+	createFire () {
+		// mesh = new THREE.Mesh(new THREE.SphereGeometry( 0.1, 32, 32 ), this.displacementMaterial);
+		var mesh = new THREE.Mesh(new THREE.IcosahedronGeometry(0.1, 3), this.displacementMaterial);
 		return mesh;
 	}
 
-	this.createEmpty = function(){
+	createEmpty () {
 		var geo = new THREE.BufferGeometry();
 
 		var vertexCount = 8;
@@ -370,55 +370,7 @@ LD32.World = function(params){
 		geo.addAttribute('uv', new THREE.BufferAttribute(uvs, 2));
 
 		geo.computeVertexNormals();
-		var floor = new THREE.Mesh(geo, floorMat);
+		var floor = new THREE.Mesh(geo, this.floorMat);
 		return floor;
 	}
-
-	/*this.createWall = function(){
-		var geo = new THREE.BufferGeometry();
-
-		var vertexCount = 8;
-		var vertices = new Float32Array(vertexCount * 3);
-		vertices = Float32Array.from([
-						 1, -1,  1,
-						 1, -1, -1,
-						-1, -1, -1,
-						-1, -1,  1,
-
-						 1, 1,  1,
-						 1, 1, -1,
-						-1, 1, -1,
-						-1, 1,  1]);
-		geo.addAttribute('position', new THREE.BufferAttribute(vertices, 3));
-
-		var indices = new Uint16Array(vertexCount * 3);
-		indices = Uint16Array.from([
-						0, 1, 5,
-						0, 5, 4,
-						1, 2, 6,
-						1, 6, 5,
-						2, 3, 7,
-						2, 7, 6,
-						3, 0, 4,
-						3, 4, 7]);
-		geo.setIndex(new THREE.BufferAttribute(indices, 1));
-
-		var uvs = new Float32Array(vertexCount * 2);
-		uvs = Float32Array.from([
-						0, 0, //0
-						0, 1, //1
-						0, 0, //2
-						0, 1, //3
-
-						1, 1, //4
-						1, 0, //5
-						1, 1, //6
-						1, 0, //7
-						]);
-		geo.addAttribute('uv', new THREE.BufferAttribute(uvs, 2));
-
-		geo.computeVertexNormals();
-		var floor = new THREE.Mesh(geo, floorMat);
-		return floor;
-	}*/
 }

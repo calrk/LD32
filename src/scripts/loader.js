@@ -1,80 +1,50 @@
 
-LD32.Loader = function(params){
-	var models = {};
-	var images = {};
-	var objectloader = new THREE.ObjectLoader();
-	var gltfLoader = new THREE.glTFLoader;
+class ModelLoader{
 
-	// objectloader.texturePath = '../textures/';
-	var loadingCount = 0;
-	var loadedCount = 0;
+	constructor () {
+		this.models = {};
+		this.gltfLoader = new THREE.glTFLoader;
 
-	// objectloader.load("models/test.js", modelToScene);
+		this.loadingCount = 0;
+		this.loadedCount = 0;
 
-	loadImage('dust', true);
-	loadImage('firefly', true);
-	loadImage('blood', true);
-	loadImage('newspaper', true);
+		console.time('Loading Models');
+		this.loadModel('torch');
+	}
 
-	loadModel('torch');
+	loadModel (name) {
+		this.loadingCount ++;
+		this.gltfLoader.load('../models/' + name + '.gltf', data => {
+			this.loadedCount ++;
+			this.models[name] = data.scene;
 
-	function loadModel(name){
-		loadingCount ++;
-		//load a model and add it to the model object
-		/*objectloader.load('../models/' + name + '.json', function(object){
-			loadedCount ++;
-			// var material = new THREE.MultiMaterial( materials );
-			models[name] = object;
-			// models[name].rotation.x = Math.PI/2;
-		}, function(e){//progress
-
-		}, function(){//error
-			loadedCount ++;
-		});*/
-		gltfLoader.load('../models/' + name + '.gltf', function(data){
-			loadedCount ++;
-			models[name] = data.scene;
-
-			models[name].traverse(function(part){
+			this.models[name].traverse(part => {
 				if(part.material){
 					var col = new THREE.Color(part.material.uniforms.u_diffuse.value.x, part.material.uniforms.u_diffuse.value.y, part.material.uniforms.u_diffuse.value.z);
 					part.material = new THREE.MeshLambertMaterial({color: col.getHex()});
 				}
-			});		
+			});
+
+			if(this.ready()){
+				console.timeEnd('Loading Models');
+			}
 		});
 	}
 
-	function loadImage(name, asTexture){
-		loadingCount ++;
-		var image = document.createElement('img');
-		image.src = '../images/' + name + '.png';
-		image.onload = function(){
-			images[name] = image;
-
-			if(asTexture){
-				LD32.textures.addTexture(name, image);
-			}
-			loadedCount ++;
-		}
-	}
-
-	this.getModel = function(name){
-		if(models[name])
-			return models[name].clone();
+	getModel (name) {
+		if(this.models[name])
+			return this.models[name].clone();
 		return new THREE.Object3D();
 	}
 
-	this.getImage = function(name){
-		if(images[name])
-			return images[name];
+	getImage (name) {
+		if(this.images[name])
+			return this.images[name];
 		console.log("Image not found.");
 		return new Image();
 	}
 
-	this.ready = function(){
-		if(loadingCount == loadedCount){
-			return true;
-		}
-		return false;
+	ready () {
+		return this.loadingCount == this.loadedCount;
 	}
 }

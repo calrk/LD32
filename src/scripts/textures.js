@@ -1,127 +1,158 @@
 
-LD32.Textures = function(params){
-	var textures = {};
-	var textureSettings = {};
-	var canvas = document.createElement('canvas');
-	var ctx = canvas.getContext('2d');
+class TextureLoader{
+	constructor(){
+		this.textures = {};
+		this.textureSettings = {};
+		this.canvas = document.createElement('canvas');
+		this.ctx = this.canvas.getContext('2d');
 
-	canvas.width = canvas.height = 128;
-	var isReady = false;
+		this.canvas.width = this.canvas.height = 128;
+		this.isReady = false;
 
-	this.ready = function(){
-		return isReady;
-	};
+		this.generate();
 
-	this.generate = function(){
-		console.log("Generating Textures...");
-		var frame = CLARITY.ctx.createImageData(canvas.width, canvas.height);
+		console.time('Loading Textures');
+		this.loadingCount = 0;
+		this.loadedCount = 0;
+
+		this.loadImage('dust');
+		this.loadImage('firefly');
+		this.loadImage('blood');
+		this.loadImage('newspaper');
+	}
+
+	ready(){
+		return this.isReady && this.loadedCount == this.loadingCount;
+	}
+
+	generate(){
+		console.time('Generating Textures');
+		var frame = CLARITY.ctx.createImageData(this.canvas.width, this.canvas.height);
 
 		var cloud = new CLARITY.Cloud({red:255, green:255, blue:255}).process(frame);
 		// cloud = new CLARITY.Blur({}).process(cloud);
 		var icloud = new CLARITY.Invert({}).process(cloud);
-		generateTexture('cloud', cloud);
-		generateTexture('wall', cloud);
-		generateTexture('dirtCeil', cloud);
+		this.generateTexture('cloud', cloud);
+		this.generateTexture('wall', cloud);
+		this.generateTexture('dirtCeil', cloud);
 
 		var cloudNorm = new CLARITY.NormalGenerator({intensity: 0.0075}).process(cloud);
-		generateTexture('wallNorm', cloudNorm);
+		this.generateTexture('wallNorm', cloudNorm);
 
 		var noiseNorm = new CLARITY.FillRGB({red: 128, green: 128, blue: 255}).process(frame);
 		// noiseNorm = new CLARITY.Noise({intensity:30, monochromatic: false}).process(noiseNorm);
 		// noiseNorm = new CLARITY.Blur({radius:2}).process(noiseNorm);
-		generateTexture('noiseNorm', noiseNorm);
-		generateTexture('dirtCeilNorm', noiseNorm);
+		this.generateTexture('noiseNorm', noiseNorm);
+		this.generateTexture('dirtCeilNorm', noiseNorm);
 
-		console.log("Textures Generated.");
-		isReady = true;
-	};
+		this.isReady = true;
+		console.timeEnd('Generating Textures');
+	}
 
-	function generateTexture(name, frame){
-		ctx.putImageData(frame, 0, 0);
+	generateTexture(name, frame){
+		this.ctx.putImageData(frame, 0, 0);
 
-		var img = canvas.toDataURL('image/png');
+		var img = this.canvas.toDataURL('image/png');
 		var imageSrc = document.createElement('img');
 
 		imageSrc.src = img;
 
-		if(!textures[name]){
-			textures[name] = new THREE.Texture();
+		if(!this.textures[name]){
+			this.textures[name] = new THREE.Texture();
 		}
 
-		textures[name].image = imageSrc;
-		if(textureSettings[name]){
-			if(textureSettings[name].wrap){
-				textures[name].wrapS = THREE.RepeatWrapping;
-				textures[name].wrapT = THREE.RepeatWrapping;
-				textures[name].repeat.x = textureSettings[name].x;
-				textures[name].repeat.y = textureSettings[name].y;
+		this.textures[name].image = imageSrc;
+		if(this.textureSettings[name]){
+			if(this.textureSettings[name].wrap){
+				this.textures[name].wrapS = THREE.RepeatWrapping;
+				this.textures[name].wrapT = THREE.RepeatWrapping;
+				this.textures[name].repeat.x = this.textureSettings[name].x;
+				this.textures[name].repeat.y = this.textureSettings[name].y;
 			}
 		}
 
-		textures[name].needsUpdate = true;
-		setTimeout(function(){
-			textures[name].needsUpdate = true;
+		this.textures[name].needsUpdate = true;
+		setTimeout(() => {
+			this.textures[name].needsUpdate = true;
 		}, 1000);
-	};
+	}
 
-	this.addTexture = function(name, image){
-		textures[name] = new THREE.Texture();
-		textures[name].image = image;
+	loadImage(name){
+		this.loadingCount ++;
+		var image = document.createElement('img');
+		image.src = '../images/' + name + '.png';
+		image.onload = () => {
+			// this.images[name] = image;
 
-		if(textureSettings[name]){
-			if(textureSettings[name].wrap){
-				textures[name].wrapS = THREE.RepeatWrapping;
-				textures[name].wrapT = THREE.RepeatWrapping;
-				textures[name].repeat.x = textureSettings[name].x;
-				textures[name].repeat.y = textureSettings[name].y;
+			this.addTexture(name, image);
+			this.loadedCount ++;
+
+			if(this.loadingCount == this.loadedCount){
+				console.timeEnd('Loading Textures');
+			}
+		}
+	}
+
+	addTexture(name, image){
+		if(!this.textures[name]){
+			this.textures[name] = new THREE.Texture();
+		}
+		this.textures[name].image = image;
+
+		if(this.textureSettings[name]){
+			if(this.textureSettings[name].wrap){
+				this.textures[name].wrapS = THREE.RepeatWrapping;
+				this.textures[name].wrapT = THREE.RepeatWrapping;
+				this.textures[name].repeat.x = this.textureSettings[name].x;
+				this.textures[name].repeat.y = this.textureSettings[name].y;
 			}
 		}
 
-		textures[name].needsUpdate = true;
-	};
+		this.textures[name].needsUpdate = true;
+	}
 
-	this.getTexture = function(name){
-		if(!textures[name]){
-			textures[name] = new THREE.Texture();
+	getTexture(name){
+		if(!this.textures[name]){
+			this.textures[name] = new THREE.Texture();
 		}
-		return textures[name];
-	};
+		return this.textures[name];
+	}
 
-	this.setOptions = function(params){
+	setOptions(params){
 		var params = params || {};
-		canvas.width = canvas.height = params.resolution || canvas.width || 512;
+		this.canvas.width = this.canvas.height = params.resolution || this.canvas.width || 512;
 
-		textureSettings['tiles'] = {
+		this.textureSettings['tiles'] = {
 			wrap: true,
 			x: params.width/2,
 			y: params.length/2
 		};
-		textureSettings['tilesNorm'] = {
+		this.textureSettings['tilesNorm'] = {
 			wrap: true,
 			x: params.width/2,
 			y: params.length/2
 		};
 
-		/*textureSettings['dirtCeil'] = {
+		/*this.textureSettings['dirtCeil'] = {
 			wrap: true,
 			x: params.width/2,
 			y: params.length/2
 		};*/
-		textureSettings['dirtCeilNorm'] = {
+		this.textureSettings['dirtCeilNorm'] = {
 			wrap: true,
 			x: params.width/2,
 			y: params.length/2
 		};
 
-		textureSettings['wall'] = {
+		this.textureSettings['wall'] = {
 			wrap: true,
 			x: 1,
 			y: 1
 		};
-		textureSettings['wallNorm'] = {
+		this.textureSettings['wallNorm'] = {
 			wrap: true,
 			x: 1,
 			y: 1
 		};
-	};
+	}
 }

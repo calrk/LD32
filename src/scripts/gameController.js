@@ -1,130 +1,135 @@
 
-LD32.GameController = function(params){
-	params = params || {};
-	var scene = params.scene;
+class GameController{
 
-	var worldVars = {
-		length: 20,
-		width: 20
-	}
+	constructor(params){
+		params = params || {};
+		this.scene = params.scene;
 
-	var atmosCooldown = 0;
-
-	LD32.textures.setOptions(worldVars);
-	LD32.textures.generate();
-
-	var world = new LD32.World(worldVars);
-	world.createWorld();
-	scene.add(world.World());
-
-	this.player = player = new LD32.Player({
-		controls:{
-			left: keys.a,
-			right: keys.d,
-			up: keys.w,
-			down: keys.s,
-			rotateLeft: keys.q,
-			rotateRight: keys.e
-		},
-		gameController: this,
-		scene: scene,
-		worldVars: worldVars,
-		isAlive: true
-	});
-	this.player.init();
-
-	this.enemies = [];
-	for(var i = 0; i < 10; i++){
-		if(Math.random() < 0.5){
-			this.enemies[i] = new LD32.Fly({gameController: this, scene: scene});
+		this.worldVars = {
+			length: 20,
+			width: 20
 		}
-		else{
-			this.enemies[i] = new LD32.Ant({gameController: this, scene: scene});
+
+		this.atmosCooldown = 0;
+
+		LD32.textures.setOptions(this.worldVars);
+		// LD32.textures.generate();
+
+		this.world = new World(this.worldVars);
+		this.world.createWorld();
+		this.scene.add(this.world.World());
+
+		this.player = new Player({
+			controls:{
+				left: keys.a,
+				right: keys.d,
+				up: keys.w,
+				down: keys.s,
+				rotateLeft: keys.q,
+				rotateRight: keys.e
+			},
+			gameController: this,
+			scene: this.scene,
+			worldVars: this.worldVars,
+			isAlive: true
+		});
+		this.player.init();
+
+		this.enemies = [];
+		for(let i = 0; i < 10; i++){
+			if(Math.random() < 0.5){
+				this.enemies[i] = new Fly({gameController: this, scene: this.scene});
+			}
+			else{
+				this.enemies[i] = new Ant({gameController: this, scene: this.scene});
+			}
+			this.enemies[i].init();
 		}
-		this.enemies[i].init();
-	}
 
-	for(var i = 0; i < this.enemies.length; i++){
-		this.enemies[i].reset();
-		var x = Math.floor(Math.random()*worldVars.width-1)+1;
-		var z = Math.floor(Math.random()*worldVars.length-1)+1;
-		while(!world.canMove(x, z) || (x <= 2 && z <= 2)){
-			x = Math.floor(Math.random()*worldVars.width);
-			z = Math.floor(Math.random()*worldVars.length);
-		}
-		this.enemies[i].setPosition(x, z);
-	}
-
-	var hud = new LD32.Hud();
-	this.explosions = [];
-	
-	var gameState = "setup";
-
-	this.reset = function(){
-		world.reset();
-		scene.remove(world.World());
-		world.createWorld();
-		scene.add(world.World());
-
-		player.reset();
-		hud.update();
-		for(var i = 0; i < this.enemies.length; i++){
+		for(let i = 0; i < this.enemies.length; i++){
 			this.enemies[i].reset();
-			var x = Math.floor(Math.random()*worldVars.width-1)+1;
-			var z = Math.floor(Math.random()*worldVars.length-1)+1;
-			while(!world.canMove(x, z) || (x <= 2 && z <= 2)){
-				x = Math.floor(Math.random()*worldVars.width);
-				z = Math.floor(Math.random()*worldVars.length);
+			let x = Math.floor(Math.random()*this.worldVars.width-1)+1;
+			let z = Math.floor(Math.random()*this.worldVars.length-1)+1;
+			while(!this.world.canMove(x, z) || (x <= 2 && z <= 2)){
+				x = Math.floor(Math.random()*this.worldVars.width);
+				z = Math.floor(Math.random()*this.worldVars.length);
+			}
+			this.enemies[i].setPosition(x, z);
+		}
+
+		this.hud = new Hud();
+		this.explosions = [];
+
+		this.state = "setup";
+	}
+
+	reset(){
+		this.world.reset();
+		this.scene.remove(this.world.World());
+		this.world.createWorld();
+		this.scene.add(this.world.World());
+
+		this.player.reset();
+		this.hud.update();
+		for(let i = 0; i < this.enemies.length; i++){
+			this.enemies[i].reset();
+			let x = Math.floor(Math.random()*this.worldVars.width-1)+1;
+			let z = Math.floor(Math.random()*this.worldVars.length-1)+1;
+			while(!this.world.canMove(x, z) || (x <= 2 && z <= 2)){
+				x = Math.floor(Math.random()*this.worldVars.width);
+				z = Math.floor(Math.random()*this.worldVars.length);
 			}
 			this.enemies[i].setPosition(x, z);
 			/*if(world.canMove(x, z)){
-				for(var j = i; j < this.enemies.length; j++){
-					// var pos = this.enemies[i].spacesOccupied();
+				for(const j = i; j < this.enemies.length; j++){
+					// const pos = this.enemies[i].spacesOccupied();
 				}
 			}*/
 		}
-		gameState = 'setup';
-	}
-	// this.reset();
-	this.start = function(){
-		gameState = "playing";
-		hud.show();
-		hud.update();
+		this.state = 'setup';
 	}
 
-	this.update = function(dt){
-		// hud.updateText(gameState);
-		world.update(dt);
-		switch(gameState){
+	start(){
+		this.state = "playing";
+		this.hud.show();
+		this.hud.update();
+	}
+
+	update(dt){
+		// hud.updateText(this.state);
+		this.world.update(dt);
+		switch(this.state){
 			case "setup":
 				break;
 			case "playing":
 				this.player.update(dt);
 
-				atmosCooldown += dt;
-				if(atmosCooldown > 4){
+				this.atmosCooldown += dt;
+				if(this.atmosCooldown > 4){
 					LD32.sounds.playAtmospheric();
-					atmosCooldown = 0 - Math.random()*2;
+					this.atmosCooldown = 0 - Math.random()*2;
 				}
 
-				for(var i = 0; i < this.enemies.length; i++){
+				for(let i = 0; i < this.enemies.length; i++){
 					this.enemies[i].update(dt);
 				}
 
-				for(var i = 0; i < this.explosions.length; i++){
-					this.explosions[i].update(dt);
+				for(let i = 0; i < this.explosions.length; i++){
+					if(this.explosions[i]){
+						this.explosions[i].update(dt);
+					}
 				}
 
 				if(this.getRemainingInsects() == 0){
-					gameState = "won";
+					this.state = "won";
 					LD32.end('end');
-					hud.hide();
+					this.hud.hide();
 				}
 
 				if(!this.player.isAlive()){
-					gameState = "lost";
+					this.state = "lost";
 					LD32.end('lost');
-					hud.hide();
+					this.hud.hide();
 				}
 				break;
 			case "over":
@@ -134,33 +139,32 @@ LD32.GameController = function(params){
 		}
 	}
 
-	this.setGameState = function(state){
-		gameState = state;
-	}
-	this.getGameState = function(){
-		return gameState;
+	setState(){
+		this.state = state;
 	}
 
-	this.spawnExplosion = function(position){
-		var explosion = new LD32.Explosion({
+	getState(){
+		return this.state;
+	}
+
+	spawnExplosion(position){
+		const explosion = new Explosion({
 			gameController: this,
-			scene: scene,
+			scene: this.scene,
 			position: position
 		});
-		this.explosions.unshift(explosion);
 	}
 
-	this.removeExplosion = function(explosion){
-		for(var i = 0; i < this.explosions.length; i++){
-			var index = this.explosions.indexOf(explosion);
-			this.explosions[index] = this.explosions[this.explosions.length-1];
-			this.explosions.pop();
-		}
+	removeExplosion(explosion){
+		const index = this.explosions.indexOf(explosion);
+		this.explosions[index] = undefined;
+		this.explosions[index] = this.explosions[this.explosions.length-1];
+		this.explosions.pop();
 	}
 
-	this.getRemainingInsects = function(){
-		var count = 0;
-		for(var i = 0; i < this.enemies.length; i++){
+	getRemainingInsects(){
+		let count = 0;
+		for(let i = 0; i < this.enemies.length; i++){
 			if(this.enemies[i].isAlive()){
 				count++;
 			}
@@ -168,18 +172,18 @@ LD32.GameController = function(params){
 		return count;
 	}
 
-	this.canMove = function(target, object, forwards){
-		var x = target.x;
-		var z = target.z;
-		if(world.canMove(x/2, z/2)){
+	canMove(target, object, forwards){
+		const x = target.x;
+		const z = target.z;
+		if(this.world.canMove(x/2, z/2)){
 			//check for player collision
-			if(object != player){
-				var pos = player.spacesOccupied();
+			if(object != this.player){
+				let pos = this.player.spacesOccupied();
 				if((pos[0].x == x && pos[0].z == z) || (pos[1].x == x && pos[1].z == z)){
-					//enemy attacking player
+					//enemy attacking this.player
 					if(forwards){
-						player.takeDamage();
-						hud.update();
+						this.player.takeDamage();
+						this.hud.update();
 						return 'attack';
 					}
 					return 'blocked';
@@ -187,16 +191,16 @@ LD32.GameController = function(params){
 			}
 
 			//check for any monster collisions;
-			for(var i = 0; i < this.enemies.length; i++){
+			for(let i = 0; i < this.enemies.length; i++){
 				if(object != this.enemies[i]){
-					var pos = this.enemies[i].spacesOccupied();
+					let pos = this.enemies[i].spacesOccupied();
 					if((pos[0].x == x && pos[0].z == z) || (pos[1].x == x && pos[1].z == z)){
-						if(object == player){
+						if(object == this.player){
 							if(this.enemies[i].isAlive()){
 								if(forwards){
-									// player attacking enemy;
+									// this.player attacking enemy;
 									this.enemies[i].takeDamage();
-									hud.update();
+									this.hud.update();
 									return 'attack';
 								}
 								return 'blocked';
@@ -214,3 +218,5 @@ LD32.GameController = function(params){
 		return 'blocked';
 	}
 }
+
+// export default GameController;

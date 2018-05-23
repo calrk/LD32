@@ -1,4 +1,5 @@
-var frames = 0;
+// import GameController from 'gameController';
+
 var LD32 = {
 	scene: undefined,
 	renderer: undefined,
@@ -18,7 +19,6 @@ var LD32 = {
 	rendering: false,
 
 	init: function(){
-		var self = this;
 		this.width = $(window).width();
 		this.height = $(window).height();
 
@@ -33,8 +33,8 @@ var LD32 = {
 		this.renderer.setClearColor(0x000000, 1.0);
 		// this.renderer.shadowMapEnabled = true;
 
-		this.loader = new LD32.Loader();
-		this.shaderLoader = new LD32.Shader();
+		this.loader = new ModelLoader();
+		this.shaderLoader = new ShaderLoader();
 
 		this.stats = new Stats();
 		// this.stats.showPanel(0);
@@ -43,8 +43,9 @@ var LD32 = {
 		this.clock = new THREE.Clock();
 		this.clock.start();
 
-		this.textures = new LD32.Textures();
-		this.sounds = new LD32.Sounds();
+		this.textures = new TextureLoader();
+		this.sounds = new SoundLoader();
+		this.geometry = new GeometryLoader();
 
 		this.mode = 'desktop';
 
@@ -57,20 +58,20 @@ var LD32 = {
 		this.noSleep = new NoSleep();
 
 		this.hammertime.get('swipe').set({ direction: Hammer.DIRECTION_HORIZONTAL });
-		this.hammertime.on('swipeleft', function(ev) {
-			self.action = 'swipeleft';
+		this.hammertime.on('swipeleft', ev => {
+			this.action = 'swipeleft';
 		});
 
-		this.hammertime.on('swiperight', function(ev) {
-			self.action = 'swiperight';
+		this.hammertime.on('swiperight', ev => {
+			this.action = 'swiperight';
 		});
 
-		this.hammertime.on('swipeup', function(ev) {
-			self.action = 'swipeup';
+		this.hammertime.on('swipeup', ev => {
+			this.action = 'swipeup';
 		});
 
-		this.hammertime.on('swipedown', function(ev) {
-			self.action = 'swipedown';
+		this.hammertime.on('swipedown', ev => {
+			this.action = 'swipedown';
 		});
 
 		this.load();
@@ -78,9 +79,8 @@ var LD32 = {
 	},
 
 	load: function(){
-		var self = this;
-		var intv = setInterval(function(){
-			if(!self.loader.ready() || !self.sounds.ready()/* || !textures.ready()*/){
+		var intv = setInterval(() => {
+			if(!this.loader.ready() || !this.sounds.ready() || !this.textures.ready()){
 				return;
 			}
 			clearInterval(intv);
@@ -88,11 +88,11 @@ var LD32 = {
 
 			$('#playButt').show();
 
-			self.gameController = new LD32.GameController({
-				scene: self.scene
+			this.gameController = new GameController({
+				scene: this.scene
 			});
 
-			self.gloop = LD32.gameController.update.bind(LD32.gameController);
+			this.gloop = LD32.gameController.update.bind(LD32.gameController);
 		}, 100);
 	},
 
@@ -120,10 +120,6 @@ var LD32 = {
 		this.mode = mode;
 		$('#' + this.mode).show();
 
-		/*if(this.mode == 'cardboard'){
-			this.setupSockets();
-		}*/
-
 		switch(this.mode){
 			case 'desktop':
 				$('#hud').show();
@@ -136,20 +132,19 @@ var LD32 = {
 			case 'mobile':
 				this.hammertime.get('swipe').set({ direction: Hammer.DIRECTION_ALL });
 				this.hammertime.get('pinch').set({ enable: true });
-				this.hammertime.on('pinchout', function(ev) {
-					self.noSleep.enable();
-					self.requestFullScreen.call(document.documentElement);
+				this.hammertime.on('pinchout', ev => {
+					this.noSleep.enable();
+					this.requestFullScreen.call(document.documentElement);
 				});
-				this.hammertime.on('pinchin', function(ev) {
-					self.noSleep.disable();
-					self.cancelFullScreen.call(document);
+				this.hammertime.on('pinchin', ev => {
+					this.noSleep.disable();
+					this.cancelFullScreen.call(document);
 				});
 				break;
 		}
 	},
 
 	start: function(){
-		var self = this;
 		$('#start').css({
 			display:'none',
 		});
@@ -175,16 +170,14 @@ var LD32 = {
 		if(this.socket){
 			return;
 		}
-		var self = this;
-
 		this.socket = io.connect('https://server.clarklavery.com', {
 			'connect timeout': 5000,
 			secure: true
 		});
 
-		this.socket.on('connected', function(){
-			self.socket.emit('insectsGame');
-			console.log(self.socket);
+		this.socket.on('connected', () => {
+			this.socket.emit('insectsGame');
+			console.log(this.socket);
 		});
 
 		this.p2p = new P2P(this.socket);
@@ -192,7 +185,7 @@ var LD32 = {
 
 		this.action = undefined;
 
-		this.p2p.on('peer-gesture', function(data){
+		this.p2p.on('peer-gesture', data => {
 			console.log(data);
 
 			if(data.action == 'set up confirm'){
@@ -203,23 +196,23 @@ var LD32 = {
 				// cancelFullScreen.call(document);
 			}
 			else if(data.action == 'pinchout'){
-				self.mode == 'cardboard';
+				this.mode == 'cardboard';
 				// start();
 				// requestFullScreen.call(document.documentElement);
-				if(self.gameController.getGameState() == 'lost' || self.gameController.getGameState() == 'won'){
-					self.restart();
+				if(this.gameController.getState() == 'lost' || this.gameController.getState() == 'won'){
+					this.restart();
 				}
-				else if(self.gameController.getGameState() == 'setup'){
-					self.start();
+				else if(this.gameController.getState() == 'setup'){
+					this.start();
 				}
 			}
 			else{
-				self.action = data.action;
+				this.action = data.action;
 			}
 		});
 
-		this.p2p.on('go-private', function () {
-			self.p2p.useSockets = false;
+		this.p2p.on('go-private', () => {
+			this.p2p.useSockets = false;
 			console.log('go privates')
 		});
 	},
@@ -306,10 +299,10 @@ var LD32 = {
 	}
 }
 
-window.addEventListener('load', function(){
+window.addEventListener('load', () => {
 	LD32.init();
 	LD32.resize();
 });
-window.addEventListener('resize', function(){
+window.addEventListener('resize', () => {
 	LD32.resize();
 });

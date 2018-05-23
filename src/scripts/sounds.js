@@ -1,31 +1,50 @@
 window.AudioContext = window.AudioContext || window.webkitAudioContext;
 
-LD32.Sounds = function(params){
-	var self = this;
-	var loadingCount = 0;
-	var loadedCount = 0;
-	this.sounds = {};
-	this.loops = {};
-	// this.soundSettings = {};
+class SoundLoader{
+	constructor(){
+		this.loadingCount = 0;
+		this.loadedCount = 0;
+		this.sounds = {};
+		this.loops = {};
+		// this.soundSettings = {};
 
-	this.audio = new AudioContext();
-	this.audioGain = this.audio.createGain();
-	this.volume = 0.15;
-	// this.audioGain.gain.value = 0.15;
-	this.audioCompressor = this.audio.createDynamicsCompressor();
+		this.audio = new AudioContext();
+		this.audioGain = this.audio.createGain();
+		this.volume = 0.15;
+		// this.audioGain.gain.value = 0.15;
+		this.audioCompressor = this.audio.createDynamicsCompressor();
 
-	this.atmosAudio = new AudioContext();
-	this.atmosGain = this.atmosAudio.createGain();
-	this.atmosGainValue = 0.25;
+		this.atmosAudio = new AudioContext();
+		this.atmosGain = this.atmosAudio.createGain();
+		this.atmosGainValue = 0.25;
 
-	this.ready = function(){
-		if(loadingCount == loadedCount){
+		this.loadSound('dirt_step_1');
+		this.loadSound('dirt_step_2');
+		this.loadSound('dirt_step_3');
+		this.loadSound('dirt_step_4');
+		this.loadSound('swing');
+		this.loadSound('thud');
+		this.loadSound('fly_damage');
+		this.loadSound('fly_die');
+		this.loadSound('ant_damage');
+		this.loadSound('ant_die');
+		this.loadSound('insect_1');
+		this.loadSound('insect_2');
+		this.loadSound('insect_3');
+		this.loadSound('insect_4');
+		this.loadSound('pain_1');
+		this.loadSound('pain_2');
+	}
+
+	ready () {
+		if(this.loadingCount == this.loadedCount){
 			return true;
 		}
+		console.log('not ready')
 		return false;
 	}
-	
-	this.setVolume = function(val) {
+
+	setVolume (val) {
 		var val = val;
 		if(val < 0){
 			val = 0;
@@ -35,8 +54,8 @@ LD32.Sounds = function(params){
 		}
 		this.volume = val;
 	}
-	
-	this.play = function(sound) {
+
+	play (sound) {
 		if(!this.sounds[sound]){
 			console.log("Sound not loaded: " + sound);
 			return;
@@ -50,31 +69,31 @@ LD32.Sounds = function(params){
 		source.start(0);
 	}
 
-	this.playFootstep = function() {
+	playFootstep () {
 		var rand = Math.floor(Math.random()*3.99)+1;
 		this.play('dirt_step_'+rand);
 	}
 
-	this.loadSound = function(url) {
-		loadingCount ++;
+	loadSound (url) {
+		this.loadingCount ++;
 		var ctx = this;
 		var request = new XMLHttpRequest();
 		request.open('GET', './sounds/' + url + '.ogg', true);
 		request.responseType = 'arraybuffer';
 
 		// Decode asynchronously
-		request.onload = function() {
+		request.onload = () => {
 			ctx.audio.decodeAudioData(request.response, function(buffer) {
 				ctx.sounds[url] = buffer;
 			}, function (err){
 				console.log(err);
 			});
-			loadedCount ++;
+			this.loadedCount ++;
 		}
 		request.send();
-	};
+	}
 
-	this.playLoop = function(sound) {
+	playLoop (sound) {
 		if(!this.sounds[sound]){
 			console.log("Sound not loaded: " + sound);
 			return;
@@ -93,7 +112,7 @@ LD32.Sounds = function(params){
 		this.loops[sound] = source;
 	}
 
-	this.stopLoop = function(sound) {
+	stopLoop (sound) {
 		if(!this.loops[sound]){
 			console.log("Sound not Playing: " + sound);
 			return;
@@ -102,38 +121,21 @@ LD32.Sounds = function(params){
 		delete this.loops[sound];
 	}
 
-	this.playAtmospheric = function() {
+	playAtmospheric () {
 		var atmos = ['insect_1', 'insect_2', 'insect_3', 'insect_4'];
 		var pos = Math.floor(Math.random()*atmos.length);
 
-		if(!self.sounds[atmos[pos]]){
+		if(!this.sounds[atmos[pos]]){
 			console.log("Sound not loaded: " + sound);
 			return;
 		}
 
-		self.atmosGain.gain.value = self.atmosGainValue*self.volume;
+		// this.atmosGain.gain.value = this.atmosGainValue*this.volume;
 
-		var source = self.atmosAudio.createBufferSource();
-		source.buffer = self.sounds[atmos[pos]];
-		source.connect(self.atmosGain);
-		self.atmosGain.connect(self.atmosAudio.destination);
+		var source = this.atmosAudio.createBufferSource();
+		source.buffer = this.sounds[atmos[pos]];
+		source.connect(this.atmosGain);
+		this.atmosGain.connect(this.atmosAudio.destination);
 		source.start(0);
 	}
-
-	this.loadSound('dirt_step_1');
-	this.loadSound('dirt_step_2');
-	this.loadSound('dirt_step_3');
-	this.loadSound('dirt_step_4');
-	this.loadSound('swing');
-	this.loadSound('thud');
-	this.loadSound('fly_damage');
-	this.loadSound('fly_die');
-	this.loadSound('ant_damage');
-	this.loadSound('ant_die');
-	this.loadSound('insect_1');
-	this.loadSound('insect_2');
-	this.loadSound('insect_3');
-	this.loadSound('insect_4');
-	this.loadSound('pain_1');
-	this.loadSound('pain_2');
 }

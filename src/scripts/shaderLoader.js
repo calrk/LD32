@@ -1,39 +1,42 @@
 
-LD32.Shader = function(params){
-	var shaders = {};
-	loadingCount = 0;
-	loadedCount = 0;
+class ShaderLoader{
 
-	loadShader('disp_vertex');
-	loadShader('disp_fragment');
-	loadShader('noise_vertex');
-	loadShader('noise_fragment');
-	loadShader('fire_vertex');
-	loadShader('fire_fragment');
+	constructor () {
+		this.shaders = {};
+		this.loadingCount = 0;
+		this.loadedCount = 0;
 
-	function loadShader(file){
-		loadingCount ++;
+		this.loadShader('disp_vertex');
+		this.loadShader('disp_fragment');
+		this.loadShader('noise_vertex');
+		this.loadShader('noise_fragment');
+		this.loadShader('fire_vertex');
+		this.loadShader('fire_fragment');
+	}
+
+	loadShader (file) {
+		this.loadingCount ++;
 
 		var client = new XMLHttpRequest();
 		client.open('GET', './shaders/' + file + '.js');
-		client.onreadystatechange = function(e) {
+		client.onreadystatechange = (e) => {
 			if(e.target.readyState == 4){
-				loadedCount ++;
-				shaders[file] = client.responseText;
+				this.loadedCount ++;
+				this.shaders[file] = client.responseText;
 				// console.log(shaders[file]);
 			}
 		}
 		client.send();
 	}
 
-	this.getShader = function(name){
-		if(shaders[name])
-			return shaders[name];
+	getShader (name) {
+		if(this.shaders[name])
+			return this.shaders[name];
 		return '';
 	}
 
-	this.ready = function(){
-		if(loadingCount == loadedCount){
+	ready () {
+		if(this.loadingCount == this.loadedCount){
 			return true;
 		}
 		return false;

@@ -1,12 +1,14 @@
-var gulp = require('gulp');
-var concat = require('gulp-concat');
-var uglify = require('gulp-uglify');
-var connect = require('gulp-connect');
-var cached = require('gulp-cached');
-var s3 = require('gulp-s3');
-var fs = require('fs');
+const gulp = require('gulp');
+const concat = require('gulp-concat');
+const uglify = require('gulp-uglify');
+const connect = require('gulp-connect');
+const cached = require('gulp-cached');
+const s3 = require('gulp-s3');
+const fs = require('fs');
+const sourcemaps = require('gulp-sourcemaps');
+const babel = require('gulp-babel');
 
-var paths = {
+const paths = {
 	js : ['./src/scripts/LD32.js', './src/scripts/*.js'],
 	resources: ['./src/resources/*.js', './src/resources/**/*.js'],
 	shaders : ['./src/shaders/*.js'],
@@ -20,46 +22,46 @@ var paths = {
 
 gulp.task('default', ['build', 'connect', 'watch']);
 gulp.task('build', ['js', 'html', 'resources', 'shaders', 'css', 'images', 'models', 'sounds', 'controller']);
-gulp.task('live', ['build', 'watch', 'aws'], function(){
+gulp.task('live', ['build', 'watch', 'aws'], () => {
 	gulp.watch('./dist/**', ['aws']);
 });
 
-gulp.task('resources', function(){
+gulp.task('resources', () => {
 	gulp.src(paths.resources)
 		.pipe(gulp.dest('./dist/resources/'));
 });
 
-gulp.task('shaders', function(){
+gulp.task('shaders', () => {
 	gulp.src(paths.shaders)
 		.pipe(gulp.dest('./dist/shaders/'));
 });
 
-gulp.task('css', function(){
+gulp.task('css', () => {
 	gulp.src(paths.css)
 		.pipe(gulp.dest('./dist/'));
 });
 
-gulp.task('images', function(){
+gulp.task('images', () => {
 	gulp.src(paths.images)
 		.pipe(gulp.dest('./dist/images/'));
 });
 
-gulp.task('models', function(){
+gulp.task('models', () => {
 	gulp.src(paths.models)
 		.pipe(gulp.dest('./dist/models/'));
 });
 
-gulp.task('sounds', function(){
+gulp.task('sounds', () => {
 	gulp.src(paths.sounds)
 		.pipe(gulp.dest('./dist/sounds/'));
 });
 
-gulp.task('controller', function(){
+gulp.task('controller', () => {
 	gulp.src(paths.controller)
 		.pipe(gulp.dest('./dist/controller/'));
 });
 
-gulp.task('html', function(){
+gulp.task('html', () => {
 	gulp.src(paths.html)
 		.pipe(gulp.dest('./dist/'));
 
@@ -67,7 +69,7 @@ gulp.task('html', function(){
 		.pipe(gulp.dest('./dist/'));
 });
 
-gulp.task('js', function(){
+gulp.task('js', () => {
 	gulp.src(paths.js)
 		.pipe(concat('ld32.js'))
 		// .pipe(uglify())
@@ -80,14 +82,25 @@ gulp.task('js', function(){
 		.pipe(gulp.dest('./build/'));*/
 });
 
-gulp.task('connect', function () {
+gulp.task('babel', () =>
+  gulp.src('./src/scripts/LD32.js')
+	.pipe(sourcemaps.init())
+  .pipe(babel({
+      presets: ['env']
+  }))
+  .pipe(concat('ld32.js'))
+  .pipe(sourcemaps.write('.'))
+  .pipe(gulp.dest('dist'))
+);
+
+gulp.task('connect', () => {
   connect.server({
   	root: './dist',
     port: 3000
   });
 });
 
-gulp.task('watch', function () {
+gulp.task('watch', () => {
 	gulp.watch(paths.js, ['js']);
 	gulp.watch(paths.resources, ['resources']);
 	gulp.watch(paths.shaders, ['shaders']);
@@ -99,7 +112,7 @@ gulp.task('watch', function () {
 	gulp.watch(paths.controller, ['controller']);
 });
 
-gulp.task('aws', function(){
+gulp.task('aws', () => {
 	aws = JSON.parse(fs.readFileSync('./aws.json'));
 
 	gulp.src('./dist/**')
