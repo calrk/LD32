@@ -9,7 +9,7 @@ const sourcemaps = require('gulp-sourcemaps');
 const babel = require('gulp-babel');
 
 const paths = {
-	js : ['./src/scripts/LD32.js', './src/scripts/*.js'],
+	js : ['./src/scripts/LD32.js','./src/scripts/prop.js', './src/scripts/*.js'],
 	resources: ['./src/resources/*.js', './src/resources/**/*.js'],
 	shaders : ['./src/shaders/*.js'],
 	css: ['./src/styles/*.css'],

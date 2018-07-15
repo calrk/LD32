@@ -30,27 +30,6 @@ class World{
 			blending: THREE.AdditiveBlending,
 			transparent: true
 		});
-
-		this.fireflyMaterial = new THREE.PointsMaterial({
-			color: 0x00aadd,
-			size: 0.1,
-			map: LD32.textures.getTexture('firefly'),
-			blending: THREE.AdditiveBlending,
-			transparent: true
-		});
-
-		this.fireUniforms = {
-			tHeightMap:  { type: "t",  value: LD32.textures.getTexture('cloud') },
-			uColor: { type: "c", value: new THREE.Color( 0xff4800 ) },
-			time: { type: "f", value: 0.0 },
-		};
-
-		this.displacementMaterial = new THREE.ShaderMaterial({
-			transparent:	true,
-			uniforms: this.fireUniforms,
-			vertexShader:	LD32.shaderLoader.getShader('fire_vertex'),
-			fragmentShader: LD32.shaderLoader.getShader('fire_fragment')
-		});
 	}
 
 	reset () {
@@ -69,20 +48,12 @@ class World{
 		}
 
 		for(var i = 0; i < this.fireflies.length; i++){
-			this.fireflies[i].light.intensity = Math.sin(LD32.clock.elapsedTime*4)*0.2+0.9;
-
-			this.fireflies[i].geometry.vertices.forEach(vertex => {
-				vertex.x = Math.sin(LD32.clock.elapsedTime/2 + vertex.offsetx)*vertex.offsetxdist;
-				vertex.y = Math.sin(LD32.clock.elapsedTime/2 + vertex.offsety)*vertex.offsetydist;
-				vertex.z = Math.sin(LD32.clock.elapsedTime/2 + vertex.offsetz)*vertex.offsetzdist;
-			});
-			this.fireflies[i].geometry.verticesNeedUpdate = true;
+			this.fireflies[i].update(dt);
 		}
 
 		for(var i = 0; i < this.torches.length; i++){
-			this.torches[i].light.intensity = Math.sin(LD32.clock.elapsedTime*16)*0.2+0.9;
+			this.torches[i].update(dt);
 		}
-		this.fireUniforms.time.value += dt;
 	}
 
 	createWorld () {
@@ -150,67 +121,38 @@ class World{
 
 		//add this.fireflies
 		for(var j = 0; j < 5; j++){
-			var fireflyParticles = new THREE.Geometry();
-			for(var i = 0; i < 10; i++){
-				fireflyParticles.vertices.push(new THREE.Vector3(Math.random()*2-1, Math.random()*2-1, Math.random()*2-1));
-				fireflyParticles.vertices[i].offsetx = Math.random()*100;
-				fireflyParticles.vertices[i].offsety = Math.random()*100;
-				fireflyParticles.vertices[i].offsetz = Math.random()*100;
-				fireflyParticles.vertices[i].offsetxdist = Math.random()*2-1;
-				fireflyParticles.vertices[i].offsetydist = Math.random()*2-1;
-				fireflyParticles.vertices[i].offsetzdist = Math.random()*2-1;
+			var pos = new THREE.Vector3(Math.floor(Math.random()*this.width), 0, Math.floor(Math.random()*this.length));
+			while(!this.canMove(pos.x, pos.z)){
+				pos.x = Math.floor(Math.random()*this.width);
+				pos.z = Math.floor(Math.random()*this.length);
 			}
-			var firefly = new THREE.Points(fireflyParticles, this.fireflyMaterial);
+			pos.x *= 2;
+			pos.z *= 2;
 
-			firefly.position.x = Math.floor(Math.random()*this.width);
-			firefly.position.z = Math.floor(Math.random()*this.length);
-			while(!this.canMove(firefly.position.x, firefly.position.z)){
-				firefly.position.x = Math.floor(Math.random()*this.width);
-				firefly.position.z = Math.floor(Math.random()*this.length);
-			}
-			firefly.position.x *= 2;
-			firefly.position.z *= 2;
-			this.world.add(firefly);
+			var firefly = new FireFly({
+				position: pos,
+				scene: this.world
+			});
 
-			var light = new THREE.PointLight(0x00ddff, 0.5, 3);
-			light.position.y = 0.5;
-			firefly.add(light);
-			firefly.light = light;
 			this.fireflies.push(firefly);
 		}
 
-		//add this.torches
 		for(var j = 0; j < 5; j++){
-			var torchHolder = new THREE.Object3D();
-			var torch = LD32.loader.getModel('torch');
+			var pos = new THREE.Vector3(Math.floor(Math.random()*this.width), -1, Math.floor(Math.random()*this.length));
+      while(!this.canMove(pos.x, pos.z)){
+        pos.x = Math.floor(Math.random()*this.width);
+        pos.z = Math.floor(Math.random()*this.length);
+      }
+      pos.x *= 2;
+      pos.z *= 2;
+      pos.z += Math.random() < 0.5 ? -0.9 : 0.9;
+      pos.x += Math.random() < 0.5 ? -0.9 : 0.9;
 
-			torchHolder.position.x = Math.floor(Math.random()*this.width);
-			torchHolder.position.z = Math.floor(Math.random()*this.length);
-			while(!this.canMove(torchHolder.position.x, torchHolder.position.z)){
-				torchHolder.position.x = Math.floor(Math.random()*this.width);
-				torchHolder.position.z = Math.floor(Math.random()*this.length);
-			}
-			torchHolder.position.x *= 2;
-			torchHolder.position.z *= 2;
-			torchHolder.position.z += Math.random() < 0.5 ? -0.9 : 0.9;
-			torchHolder.position.x += Math.random() < 0.5 ? -0.9 : 0.9;
-			torchHolder.position.y = -1;
-			torchHolder.rotation.y = Math.random()*Math.PI*2;
-
-			torch.scale.set(25,25,25);
-
-			this.world.add(torchHolder);
-			torchHolder.add(torch);
-			var light = new THREE.PointLight(0xff8800, 0.5, 3);
-			light.position.y = 0.7;
-			torchHolder.add(light);
-			torchHolder.light = light;
-
-			var fire = this.createFire();
-			fire.position.y = 1.05;
-			torchHolder.add(fire);
-
-			this.torches.push(torchHolder);
+			var torch = new Torch({
+				position: pos,
+				scene: this.world
+			});
+			this.torches.push(torch);
 		}
 	}
 
@@ -317,6 +259,9 @@ class World{
 		if(i < 0 || j < 0){
 			return false;
 		}
+		if(!this.content[i]){
+			return false;
+		}
 		if(!this.content[i][j]){
 			return true;
 		}
@@ -324,12 +269,6 @@ class World{
 
 	World () {
 		return this.world;
-	}
-
-	createFire () {
-		// mesh = new THREE.Mesh(new THREE.SphereGeometry( 0.1, 32, 32 ), this.displacementMaterial);
-		var mesh = new THREE.Mesh(new THREE.IcosahedronGeometry(0.1, 3), this.displacementMaterial);
-		return mesh;
 	}
 
 	createEmpty () {
