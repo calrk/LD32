@@ -295,45 +295,7 @@ class Fly extends Actor{
 	}
 
 	createWing (mat) {
-		var geo = new THREE.Geometry();
-		var mat = mat || new THREE.MeshLambertMaterial({color: 0x000000, transparent: true, opacity: 0.5});
-
-		geo.vertices.push(new THREE.Vector3(0.75, 0, 0.75));
-		geo.vertices.push(new THREE.Vector3(-0.75, 0, 0.75));
-		geo.vertices.push(new THREE.Vector3(0, 0.1, 0));
-		geo.vertices.push(new THREE.Vector3(0, -0.1, 0));
-		geo.vertices.push(new THREE.Vector3(0, 0, 1.5));
-		geo.vertices.push(new THREE.Vector3(0, 0, -0.5));
-
-		geo.faces.push(new THREE.Face3(0, 2, 4));
-		geo.faces.push(new THREE.Face3(0, 4, 3));
-		geo.faces.push(new THREE.Face3(0, 3, 5));
-		geo.faces.push(new THREE.Face3(0, 5, 2));
-
-		geo.faces.push(new THREE.Face3(1, 2, 5));
-		geo.faces.push(new THREE.Face3(1, 5, 3));
-		geo.faces.push(new THREE.Face3(1, 3, 4));
-		geo.faces.push(new THREE.Face3(1, 4, 2));
-
-		var uva = new THREE.Vector2(0, 0);
-		var uvb = new THREE.Vector2(0, 1);
-		var uvc = new THREE.Vector2(1, 1);
-		var uvd = new THREE.Vector2(1, 0);
-
-		geo.faceVertexUvs[ 0 ].push( [ uvb, uva, uvd ] );
-		geo.faceVertexUvs[ 0 ].push( [ uvb, uva, uvd ] );
-		geo.faceVertexUvs[ 0 ].push( [ uvb, uva, uvd ] );//under
-		geo.faceVertexUvs[ 0 ].push( [ uvb, uva, uvd ] );//under
-
-		geo.faceVertexUvs[ 0 ].push( [ uva, uvd, uvb ] );
-		geo.faceVertexUvs[ 0 ].push( [ uva, uvd, uvb ] );
-		geo.faceVertexUvs[ 0 ].push( [ uva, uvd, uvb ] );//under
-		geo.faceVertexUvs[ 0 ].push( [ uva, uvd, uvb ] );//under
-
-		geo.computeFaceNormals();
-
-		var diamond = new THREE.Mesh(geo, mat);
-		return diamond;
+		return new THREE.Mesh(LD32.geometry.createWing(), new THREE.MeshLambertMaterial({color: 0x000000, transparent: true, opacity: 0.5}));
 	}
 
 	createBody () {

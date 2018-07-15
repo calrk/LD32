@@ -11,7 +11,10 @@
 	<script type="text/javascript" src="./resources/clarity.min.js"></script>
 	<!-- <script type="text/javascript" src="./resources/simplex.min.js"></script> -->
 	<!-- <script type="text/javascript" src="./resources/VREffect.js"></script> -->
-	<script type="text/javascript" src="./resources/StereoEffect.js"></script>
+	<!-- <script type="text/javascript" src="./resources/StereoEffect.js"></script> -->
+
+	<script type="text/javascript" src="./resources/WebVR.js"></script>
+	<script type="text/javascript" src="./resources/DaydreamController.js"></script>
 	<script type="text/javascript" src="./resources/DeviceOrientationControls.js"></script>
 	<script type="text/javascript" src="./resources/hammer.min.js"></script>
 	<script type="text/javascript" src="./resources/nosleep.min.js"></script>
@@ -48,12 +51,12 @@
 	<div id='start'>
 		<div class='menu'>
 			<h1>Giant Insects!</h1>
-			
-			<p>Giant Insects are taking over the world. You have been conscripted into travelling into their burrow to exterminate them, given the deadliest weapon known to insects, a newspaper.</p>
 
-			<p>Hunt around their burrow for them and walk into the insects to attack them.</p>
+			<!-- <p>Giant Insects are taking over the world. You have been conscripted into travelling into their burrow to exterminate them, given the deadliest weapon known to insects, a newspaper.</p>
 
-			
+			<p>Hunt around their burrow for them and walk into the insects to attack them.</p> -->
+
+
 
 			<hr>
 			<!-- <p>Select your platform:</p> -->
@@ -128,7 +131,7 @@
 
 			<span id='cardboard' style='display: none;'>
 				<hr>
-				<h3>Google Cardboard Controls</h3>
+				<!-- <h3>Google Cardboard Controls</h3>
 				<p>Move forwards into the insects in order to attack them.</p>
 				<a>Go To http://giantinsects.clarklavery.com/controller on a separate device to use it as a controller.</a>
 				<table>
@@ -149,7 +152,7 @@
 						<td> - Moves right</td>
 					</tr>
 				</table>
-				<p>Rotate your head to look around</p>
+				<p>Rotate your head to look around</p> -->
 				<input type='button' value='Set up Controller' onclick='LD32.setupSockets()'>
 				<img id='connectionoff' src="images\noconnection.png" width='64'>
 				<img id='connectionon' class='hided' src="images\connection.png" width='64'>
@@ -164,7 +167,7 @@
 	<div id='end'>
 		<div class='menu'>
 			<h1>Giant Insects!</h1>
-			
+
 			<p>You have killed all the insects and saved the human race!</p>
 
 			<p>Thank you for playing!</p>
@@ -179,7 +182,7 @@
 	<div id='lost'>
 		<div class='menu'>
 			<h1>Giant Insects!</h1>
-			
+
 			<p>You have died to the insects. The last hope for humanity is lost and with it, the human race...</p>
 
 			<p>Thank you for playing!</p>
