@@ -11,7 +11,7 @@ class Player extends Actor{
 			down: keys.s,
 		};
 
-		this.camera = new THREE.PerspectiveCamera(75, LD32.width/LD32.height, 0.1, 10);
+		this.camera = LD32.camera;//new THREE.PerspectiveCamera(75, LD32.width/LD32.height, 0.1, 10);
 		this.light = new THREE.PointLight(0xffffff, 1, 10);
 		this.camera.add(this.light);
 		this.orientation = new THREE.DeviceOrientationControls(this.camera);
@@ -20,12 +20,12 @@ class Player extends Actor{
 	createModel () {
 		this.model = new THREE.Object3D();
 
-		var weaponJoint = this.createJoint();
-		weaponJoint.position.x = 0.75;
-		weaponJoint.position.y = -1.5;
-		weaponJoint.position.z = -1;
-		weaponJoint.name = 'weapon';
-		this.camera.add(weaponJoint);
+		this.weaponJoint = this.createJoint();
+		this.weaponJoint.position.x = 0.75;
+		this.weaponJoint.position.y = -1.5;
+		this.weaponJoint.position.z = -1;
+		this.weaponJoint.name = 'weapon';
+		this.camera.add(this.weaponJoint);
 
 		var weaponMat = new THREE.MeshLambertMaterial({
 			color: 0xffffff,
@@ -33,11 +33,93 @@ class Player extends Actor{
 		});
 		weaponMat.depthTest = false;
 		weaponMat.transparent = true
-		var weapon = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.1, 1.5, 16, 16), weaponMat);
-		weapon.position.y = 1;
-		weapon.rotation.y = 0.75;
-		weapon.renderOrder = 10;
-		weaponJoint.add(weapon);
+		this.weapon = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.1, 1.5, 16, 16), weaponMat);
+		this.weapon.position.y = 1;
+		this.weapon.rotation.y = 0.75;
+		this.weapon.renderOrder = 10;
+		this.weaponJoint.add(this.weapon);
+
+	}
+
+	setVr(){
+		if(!this.controller){
+			this.controller = new THREE.DaydreamController();
+		}
+		this.controller.position.set( 0.3, 0.85/*-1.6*/, -0.5 );
+		this.model.add( this.controller );
+
+		this.controller.add(this.weaponJoint);
+		this.weaponJoint.position.x = 0;
+		this.weaponJoint.position.y = 0;
+		this.weaponJoint.position.z = 0;
+
+		this.weaponJoint.rotation.x = -1.57;
+		this.weaponJoint.rotation.y = 0;
+		this.weaponJoint.rotation.z = 0;
+
+		this.weapon.position.x = 0;
+		this.weapon.position.y = 2;
+		this.weapon.position.z = 0;
+
+		this.isVR = true;
+		// this.weapon.position.set(0,0,0);
+		// this.weapon.scale.set(0.1,0.1,0.1);
+
+		// var controllerHelper = new THREE.Line( new THREE.BufferGeometry(), new THREE.LineBasicMaterial( { linewidth: 2 } ) );
+		// controllerHelper.geometry.addAttribute( 'position', new THREE.Float32BufferAttribute( [ 0, 0, 0, 0, 0, - 10 ], 3 ) );
+		// this.controller.add( controllerHelper );
+
+		this.controller.addEventListener('angularvelocitychanged', data => {
+			if(data.angularVelocity.x < -5 && this.state == 'still'){
+				//attack
+
+				var target = this.forward.clone().multiplyScalar(2);
+				this.targetPos = this.model.position.clone().add(target);
+				this.prevPos = this.model.position.clone();
+
+				var result = this.gameController.canMove(this.targetPos, this, true);
+				if(result == 'attack'){
+					target = target.clone().multiplyScalar(0.15);
+					this.targetPos = this.model.position.clone().add(target);
+					this.interpPercent = 0;
+					this.state = 'attacking';
+					LD32.sounds.play('swing');
+				}
+			}
+		});
+	}
+
+	setMove (target){
+		var forwards = false;
+		if(target.equals(this.forward)){
+			forwards = true;
+		}
+
+		target = target.clone().multiplyScalar(2);
+		this.prevPos = this.model.position.clone();
+		this.targetPos = this.model.position.clone().add(target);
+
+		this.interpPercent = 0;
+		var result = this.gameController.canMove(this.targetPos, this, forwards);
+		if(result == 'move'){
+			this.state = 'moving';
+			return result;
+		}
+		else if(result == 'blocked'){
+			target = target.clone().multiplyScalar(0.15);
+			this.targetPos = this.model.position.clone().add(target);
+			this.state = 'movingFail';
+			return result;
+		}
+		else if(result == 'attack'){
+			if(target.equals(this.forward)){
+
+			}
+			target = target.clone().multiplyScalar(0.15);
+			this.targetPos = this.model.position.clone().add(target);
+			this.state = 'attacking';
+			return result;
+		}
 	}
 
 	takeDamage (damage) {
@@ -61,7 +143,6 @@ class Player extends Actor{
 		this.targetPos = this.model.position;
 
 		this.setRotation(-1);
-
 		this.model.add(this.camera);
 	}
 
@@ -90,7 +171,6 @@ class Player extends Actor{
 
 	stillAction (dt) {
 		var result = false;
-
 		var rotY = this.camera.rotation.y*(180/Math.PI);
 		var nearest90 = Math.round(rotY/(90))*90;
 
@@ -158,6 +238,16 @@ class Player extends Actor{
 			this.setRotation(-1);
 			LD32.sounds.playFootstep();
 		}
+
+		if(this.controller && this.controller.getTouchpadState() === true){
+			result = this.setMove(this.forward);
+			if(result == 'attack'){
+				// need to cancel the attack
+				// return;
+			}
+			LD32.sounds.playFootstep();
+		}
+
 		if(result == 'move'){
 			/*setTimeout(function(){
 				LD32.sounds.playFootstep();
@@ -167,7 +257,7 @@ class Player extends Actor{
 			LD32.sounds.play('swing');
 		}
 		else if(result == 'blocked'){
-			setTimeout(function(){
+			setTimeout(() => {
 				LD32.sounds.play('thud');
 			}, 150);
 		}
@@ -176,12 +266,34 @@ class Player extends Actor{
 	update (dt) {
 		super.update(dt);
 		this.light.intensity = Math.sin(LD32.clock.elapsedTime)*0.2+0.9;
+		if(this.isVR){
+			this.light.intensity += 0.5;
+			this.light.distance = 15;
+		}
 		if(this.orientation.deviceOrientation.alpha !== null){
 			this.orientation.update();
+		}
+
+		this.model.position.y = -this.camera.position.y;
+		if(this.controller){
+			this.controller.update();
+		}
+	}
+
+	over(dt){
+		if(this.controller){
+			this.controller.update();
+
+			if ( this.controller.getTouchpadState() === true ) {
+				LD32.restart();
+			}
 		}
 	}
 
 	attackAnim () {
+		if(this.isVR){
+			return;
+		}
 		this.model.getObjectByName('weapon').rotation.x = this.interpolator([0, 0.33, 0.66, 1], [0, 0.35, -0.75, 0], this.interpPercent);
 		this.model.getObjectByName('weapon').rotation.z = this.interpolator([0, 0.33, 0.66, 1], [0, -0.1, 0.25, 0], this.interpPercent);
 	}

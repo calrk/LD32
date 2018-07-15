@@ -135,6 +135,7 @@ class GameController{
 			case "over":
 			case "lost":
 			case "won":
+				this.player.over(dt);
 				break;
 		}
 	}

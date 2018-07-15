@@ -27,11 +27,16 @@ var LD32 = {
 		this.scene.fog = new THREE.FogExp2( 0x000000, 0.1, 10 );
 
 		var canvas = document.getElementById('canvas');
-		this.renderer = new THREE.WebGLRenderer({ antialias:true, canvas: canvas });
+		this.renderer = new THREE.WebGLRenderer({ antialias: true, canvas: canvas });
 		this.renderer.setPixelRatio(window.devicePixelRatio ? window.devicePixelRatio : 1);
 		this.renderer.setSize(this.width, this.height);
 		this.renderer.setClearColor(0x000000, 1.0);
+		this.renderer.vr.enabled = true;
+
+		this.renderer.setAnimationLoop(this.loop);
 		// this.renderer.shadowMapEnabled = true;
+		this.camera = new THREE.PerspectiveCamera(70, LD32.width/LD32.height, 0.1, 100);
+		this.scene.add(this.camera);
 
 		this.loader = new ModelLoader();
 		this.shaderLoader = new ShaderLoader();
@@ -92,23 +97,27 @@ var LD32 = {
 				scene: this.scene
 			});
 
-			this.gloop = LD32.gameController.update.bind(LD32.gameController);
+			// this.gloop = LD32.gameController.update.bind(LD32.gameController);
 		}, 100);
 	},
 
 	loop: function(){
 		// requestAnimationFrame(LD32.loop);
-		setTimeout(LD32.loop, 32);
+		// setTimeout(LD32.loop, 32);
 		LD32.stats.begin();
 		var dt = LD32.clock.getDelta();
 
-		LD32.gloop(dt);
+		if(LD32.gameController){
+			LD32.gameController.update(dt);
+		}
+
+		// LD32.gloop(dt);
 
 		if(LD32.effect){
-			LD32.effect.render(LD32.scene, LD32.gameController.player.camera);
+			LD32.effect.render(LD32.scene, LD32.camera);
 		}
 		else{
-			LD32.renderer.render(LD32.scene, LD32.gameController.player.camera);
+			LD32.renderer.render(LD32.scene, LD32.camera);
 		}
 		LD32.stats.end();
 	},
@@ -129,6 +138,8 @@ var LD32 = {
 				this.hammertime.get('pinch').set({ enable: false });
 				break;
 			case 'cardboard':
+				document.body.appendChild( WEBVR.createButton( this.renderer ) );
+				LD32.gameController.player.setVr();
 			case 'mobile':
 				this.hammertime.get('swipe').set({ direction: Hammer.DIRECTION_ALL });
 				this.hammertime.get('pinch').set({ enable: true });
@@ -157,7 +168,7 @@ var LD32 = {
 				this.requestFullScreen.call(document.documentElement);
 				break;
 			case 'cardboard':
-				this.effect = new THREE.StereoEffect(this.renderer);
+				// this.effect = new THREE.StereoEffect(this.renderer);
 				// this.effect = new THREE.VREffect(this.renderer);
 			case 'mobile':
 				this.requestFullScreen.call(document.documentElement);
