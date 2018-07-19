@@ -1,3 +1,7 @@
+const THREE = require('three');
+
+const SoundLoader = require('./sounds.js');
+
 class Actor{
 
 	constructor (params) {
@@ -36,7 +40,7 @@ class Actor{
 		this.gameController.spawnExplosion(this.model.position);
 		if(this.takeDamageSound){
 			setTimeout(() => {
-				LD32.sounds.play(this.takeDamageSound);
+				SoundLoader.play(this.takeDamageSound);
 			}, 150);
 		}
 	}
@@ -44,7 +48,7 @@ class Actor{
 	die () {
 		if(this.dieSound){
 			setTimeout(() => {
-				LD32.sounds.play(this.dieSound);
+				SoundLoader.play(this.dieSound);
 			}, 150);
 		}
 	}
@@ -297,7 +301,7 @@ class Actor{
 	}
 
 	createDiamond(size, mat){
-		return LD32.geometry.createDiamond(size, mat);
+		return GeometryLoader.createDiamond(size, mat);
 	}
 
 	idleAnim(){}
@@ -333,3 +337,5 @@ class Actor{
 		return (deltaAngle * animPos) + angles[firstPos];
 	}
 }
+
+module.exports = Actor;

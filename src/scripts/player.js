@@ -1,3 +1,13 @@
+const THREE = require('three');
+const DeviceOrientationControls = require('../resources/DeviceOrientationControls.js')
+const DaydreamController = require('../resources/DaydreamController.js')
+
+const Actor = require('./actor.js');
+const TextureLoader = require('./textures.js');
+const SoundLoader = require('./sounds.js');
+
+const { keysDown, InputController } = require('./keyboardControls');
+
 
 class Player extends Actor{
 
@@ -11,10 +21,10 @@ class Player extends Actor{
 			down: keys.s,
 		};
 
-		this.camera = LD32.camera;//new THREE.PerspectiveCamera(75, LD32.width/LD32.height, 0.1, 10);
+		this.camera = params.scene.camera;
 		this.light = new THREE.PointLight(0xffffff, 1, 10);
 		this.camera.add(this.light);
-		this.orientation = new THREE.DeviceOrientationControls(this.camera);
+		this.orientation = new DeviceOrientationControls(this.camera);
 	}
 
 	createModel () {
@@ -29,7 +39,7 @@ class Player extends Actor{
 
 		var weaponMat = new THREE.MeshLambertMaterial({
 			color: 0xffffff,
-			map: LD32.textures.getTexture('newspaper'),
+			map: TextureLoader.getTexture('newspaper'),
 		});
 		weaponMat.depthTest = false;
 		weaponMat.transparent = true
@@ -38,12 +48,11 @@ class Player extends Actor{
 		this.weapon.rotation.y = 0.75;
 		this.weapon.renderOrder = 10;
 		this.weaponJoint.add(this.weapon);
-
 	}
 
 	setVr(){
 		if(!this.controller){
-			this.controller = new THREE.DaydreamController();
+			this.controller = new DaydreamController();
 		}
 		this.controller.position.set( 0.3, 0.85/*-1.6*/, -0.5 );
 		this.model.add( this.controller );
@@ -83,7 +92,7 @@ class Player extends Actor{
 					this.targetPos = this.model.position.clone().add(target);
 					this.interpPercent = 0;
 					this.state = 'attacking';
-					LD32.sounds.play('swing');
+					SoundLoader.play('swing');
 				}
 			}
 		});
@@ -126,10 +135,10 @@ class Player extends Actor{
 		super.takeDamage(damage);
 		setTimeout(() => {
 			if(Math.random() < 0.5){
-				LD32.sounds.play('pain_1');
+				SoundLoader.play('pain_1');
 			}
 			else{
-				LD32.sounds.play('pain_2');
+				SoundLoader.play('pain_2');
 			}
 		}, 150);
 	}
@@ -192,51 +201,51 @@ class Player extends Actor{
 			this.right = new THREE.Vector3(0, 0, -1);
 		}
 
-		if(keysDown[this.controls.left] || keysDown[keys.left]){
+		if(keysDown[this.controls.left] || keysDown[this.controls.left]){
 			result = this.setMove(this.right.clone().multiplyScalar(-1));
-			LD32.sounds.playFootstep();
+			SoundLoader.playFootstep();
 		}
-		if(keysDown[this.controls.right] || keysDown[keys.right]){
+		if(keysDown[this.controls.right] || keysDown[this.controls.right]){
 			result = this.setMove(this.right);
-			LD32.sounds.playFootstep();
+			SoundLoader.playFootstep();
 		}
-		if(keysDown[this.controls.up] || keysDown[keys.up]){
+		if(keysDown[this.controls.up] || keysDown[this.controls.up]){
 			result = this.setMove(this.forward);
-			LD32.sounds.playFootstep();
+			SoundLoader.playFootstep();
 		}
-		if(keysDown[this.controls.down] || keysDown[keys.down]){
+		if(keysDown[this.controls.down] || keysDown[this.controls.down]){
 			result = this.setMove(this.forward.clone().multiplyScalar(-1));
-			LD32.sounds.playFootstep();
+			SoundLoader.playFootstep();
 		}
 
-		if(LD32.action == 'swipeleft'){
+		if(InputController.action == 'swipeleft'){
 			result = this.setMove(this.right.clone().multiplyScalar(-1));
-			LD32.sounds.playFootstep();
-			LD32.action = undefined;
+			SoundLoader.playFootstep();
+			InputController.action = undefined;
 		}
-		else if(LD32.action == 'swiperight'){
+		else if(InputController.action == 'swiperight'){
 			result = this.setMove(this.right);
-			LD32.sounds.playFootstep();
-			LD32.action = undefined;
+			SoundLoader.playFootstep();
+			InputController.action = undefined;
 		}
-		else if(LD32.action == 'swipeup'){
+		else if(InputController.action == 'swipeup'){
 			result = this.setMove(this.forward);
-			LD32.sounds.playFootstep();
-			LD32.action = undefined;
+			SoundLoader.playFootstep();
+			InputController.action = undefined;
 		}
-		else if(LD32.action == 'swipedown'){
+		else if(InputController.action == 'swipedown'){
 			result = this.setMove(this.forward.clone().multiplyScalar(-1));
-			LD32.sounds.playFootstep();
-			LD32.action = undefined;
+			SoundLoader.playFootstep();
+			InputController.action = undefined;
 		}
 
 		if(keysDown[this.controls.rotateLeft]){
 			this.setRotation(1);
-			LD32.sounds.playFootstep();
+			SoundLoader.playFootstep();
 		}
 		if(keysDown[this.controls.rotateRight]){
 			this.setRotation(-1);
-			LD32.sounds.playFootstep();
+			SoundLoader.playFootstep();
 		}
 
 		if(this.controller && this.controller.getTouchpadState() === true){
@@ -245,28 +254,28 @@ class Player extends Actor{
 				// need to cancel the attack
 				// return;
 			}
-			LD32.sounds.playFootstep();
+			SoundLoader.playFootstep();
 		}
 
 		if(result == 'move'){
 			/*setTimeout(function(){
-				LD32.sounds.playFootstep();
+				SoundLoader.playFootstep();
 			}, 250);*/
 		}
 		else if(result == 'attack'){
-			LD32.sounds.play('swing');
+			SoundLoader.play('swing');
 		}
 		else if(result == 'blocked'){
 			setTimeout(() => {
-				LD32.sounds.play('thud');
+				SoundLoader.play('thud');
 			}, 150);
 		}
 	}
 
 	update (dt) {
 		super.update(dt);
-		this.light.intensity = Math.sin(LD32.clock.elapsedTime)*0.2+0.9;
-		if(this.isVR){
+		this.light.intensity = Math.sin(this.gameController.clock.elapsedTime)*0.2+0.9;
+		if(this.isVR || this.isMobile){
 			this.light.intensity += 0.5;
 			this.light.distance = 15;
 		}
@@ -285,7 +294,7 @@ class Player extends Actor{
 			this.controller.update();
 
 			if ( this.controller.getTouchpadState() === true ) {
-				LD32.restart();
+				this.gameController.restart();
 			}
 		}
 	}
@@ -298,3 +307,5 @@ class Player extends Actor{
 		this.model.getObjectByName('weapon').rotation.z = this.interpolator([0, 0.33, 0.66, 1], [0, -0.1, 0.25, 0], this.interpPercent);
 	}
 }
+
+module.exports = Player;

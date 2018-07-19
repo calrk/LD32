@@ -1,3 +1,8 @@
+const THREE = require('three');
+
+const Prop = require('./prop');
+const TextureLoader = require('./textures.js');
+
 class FireFly extends Prop{
 	constructor (params) {
 		super(params);
@@ -5,7 +10,7 @@ class FireFly extends Prop{
 		this.fireflyMaterial = new THREE.PointsMaterial({
 			color: 0x00aadd,
 			size: 0.1,
-			map: LD32.textures.getTexture('firefly'),
+			map: TextureLoader.getTexture('firefly'),
 			blending: THREE.AdditiveBlending,
 			transparent: true
 		});
@@ -33,13 +38,15 @@ class FireFly extends Prop{
 	}
 
 	update (dt) {
-		this.light.intensity = Math.sin(LD32.clock.elapsedTime*4)*0.2+0.9;
+		this.light.intensity = Math.sin(this.gameController.clock.elapsedTime*4)*0.2+0.9;
 
 		this.sceneObject.geometry.vertices.forEach(vertex => {
-			vertex.x = Math.sin(LD32.clock.elapsedTime/2 + vertex.offsetx)*vertex.offsetxdist;
-			vertex.y = Math.sin(LD32.clock.elapsedTime/2 + vertex.offsety)*vertex.offsetydist;
-			vertex.z = Math.sin(LD32.clock.elapsedTime/2 + vertex.offsetz)*vertex.offsetzdist;
+			vertex.x = Math.sin(this.gameController.clock.elapsedTime/2 + vertex.offsetx)*vertex.offsetxdist;
+			vertex.y = Math.sin(this.gameController.clock.elapsedTime/2 + vertex.offsety)*vertex.offsetydist;
+			vertex.z = Math.sin(this.gameController.clock.elapsedTime/2 + vertex.offsetz)*vertex.offsetzdist;
 		});
 		this.sceneObject.geometry.verticesNeedUpdate = true;
 	}
 }
+
+module.exports = FireFly;

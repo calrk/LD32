@@ -1,14 +1,22 @@
-// import GameController from 'gameController';
+const THREE = require('three');
+const NoSleep = require('nosleep');
+// const Stats = require("stats");
+const $ = require('../resources/jquery-2.1.3.min.js');
+const WEBVR = require('../resources/WebVR.js');
+
+const ModelLoader = require('./loader.js');
+const ShaderLoader = require('./shaderLoader.js');
+const TextureLoader = require('./textures.js');
+const SoundLoader = require('./sounds.js');
+const GeometryLoader = require('./geometryLoader.js');
+
+const GameController = require('./gameController.js');
 
 var LD32 = {
 	scene: undefined,
 	renderer: undefined,
 	effect: undefined,
 	gameController: undefined,
-	textures: undefined,
-	sounds: undefined,
-	loader: undefined,
-	shaderLoader: undefined,
 	stats: undefined,
 	clock: undefined,
 	hammertime: undefined,
@@ -23,7 +31,6 @@ var LD32 = {
 		this.height = $(window).height();
 
 		this.scene = new THREE.Scene();
-		// this.scene2 = new THREE.Scene();
 		this.scene.fog = new THREE.FogExp2( 0x000000, 0.1, 10 );
 
 		var canvas = document.getElementById('canvas');
@@ -36,21 +43,12 @@ var LD32 = {
 		this.renderer.setAnimationLoop(this.loop);
 		// this.renderer.shadowMapEnabled = true;
 		this.camera = new THREE.PerspectiveCamera(70, LD32.width/LD32.height, 0.1, 100);
+		this.scene.camera = this.camera;
 		this.scene.add(this.camera);
 
-		this.loader = new ModelLoader();
-		this.shaderLoader = new ShaderLoader();
-
-		this.stats = new Stats();
+		// this.stats = new Stats();
 		// this.stats.showPanel(0);
 		// document.body.appendChild(this.stats.dom);
-
-		this.clock = new THREE.Clock();
-		this.clock.start();
-
-		this.textures = new TextureLoader();
-		this.sounds = new SoundLoader();
-		this.geometry = new GeometryLoader();
 
 		this.mode = 'desktop';
 
@@ -59,33 +57,36 @@ var LD32 = {
 		this.requestFullScreen = docEl.requestFullscreen || docEl.mozRequestFullScreen || docEl.webkitRequestFullScreen || docEl.msRequestFullscreen;
 		this.cancelFullScreen = doc.exitFullscreen || doc.mozCancelFullScreen || doc.webkitExitFullscreen || doc.msExitFullscreen;
 
-		this.hammertime = new Hammer(docEl);
-		this.noSleep = new NoSleep();
-
-		this.hammertime.get('swipe').set({ direction: Hammer.DIRECTION_HORIZONTAL });
-		this.hammertime.on('swipeleft', ev => {
-			this.action = 'swipeleft';
-		});
-
-		this.hammertime.on('swiperight', ev => {
-			this.action = 'swiperight';
-		});
-
-		this.hammertime.on('swipeup', ev => {
-			this.action = 'swipeup';
-		});
-
-		this.hammertime.on('swipedown', ev => {
-			this.action = 'swipedown';
-		});
+		this.noSleep = undefined;//new NoSleep();
 
 		this.load();
 		console.log("Loading...");
+
+		$('#playButt').click(() => {
+			LD32.start();
+		});
+
+		$('#restartButt1').click(() => {
+			LD32.restart();
+		});
+		$('#restartButt2').click(() => {
+			LD32.restart();
+		});
+
+		$('#modeButt1').click(() => {
+			LD32.setMode("desktop");
+		});
+		$('#modeButt2').click(() => {
+			LD32.setMode("mobile");
+		});
+		$('#modeButt3').click(() => {
+			LD32.setMode("cardboard");
+		});
 	},
 
 	load: function(){
 		var intv = setInterval(() => {
-			if(!this.loader.ready() || !this.sounds.ready() || !this.textures.ready()){
+			if(!ModelLoader.ready() || !SoundLoader.ready() || !TextureLoader.ready()){
 				return;
 			}
 			clearInterval(intv);
@@ -94,7 +95,8 @@ var LD32 = {
 			$('#playButt').show();
 
 			this.gameController = new GameController({
-				scene: this.scene
+				scene: this.scene,
+				LD32: this
 			});
 
 			// this.gloop = LD32.gameController.update.bind(LD32.gameController);
@@ -104,8 +106,11 @@ var LD32 = {
 	loop: function(){
 		// requestAnimationFrame(LD32.loop);
 		// setTimeout(LD32.loop, 32);
-		LD32.stats.begin();
-		var dt = LD32.clock.getDelta();
+		// LD32.stats.begin();
+		if(!LD32.gameController){
+			return;
+		}
+		var dt = LD32.gameController.clock.getDelta();
 
 		if(LD32.gameController){
 			LD32.gameController.update(dt);
@@ -119,7 +124,7 @@ var LD32 = {
 		else{
 			LD32.renderer.render(LD32.scene, LD32.camera);
 		}
-		LD32.stats.end();
+		// LD32.stats.end();
 	},
 
 	setMode: function(mode){
@@ -133,24 +138,12 @@ var LD32 = {
 			case 'desktop':
 				$('#hud').show();
 				this.requestFullScreen.call(document.documentElement);
-
-				this.hammertime.get('swipe').set({ direction: Hammer.DIRECTION_HORIZONTAL });
-				this.hammertime.get('pinch').set({ enable: false });
 				break;
 			case 'cardboard':
 				document.body.appendChild( WEBVR.createButton( this.renderer ) );
 				LD32.gameController.player.setVr();
 			case 'mobile':
-				this.hammertime.get('swipe').set({ direction: Hammer.DIRECTION_ALL });
-				this.hammertime.get('pinch').set({ enable: true });
-				this.hammertime.on('pinchout', ev => {
-					this.noSleep.enable();
-					this.requestFullScreen.call(document.documentElement);
-				});
-				this.hammertime.on('pinchin', ev => {
-					this.noSleep.disable();
-					this.cancelFullScreen.call(document);
-				});
+				LD32.gameController.player.isMobile = true;
 				break;
 		}
 	},
@@ -172,7 +165,7 @@ var LD32 = {
 				// this.effect = new THREE.VREffect(this.renderer);
 			case 'mobile':
 				this.requestFullScreen.call(document.documentElement);
-				this.noSleep.enable();
+				// this.noSleep.enable();
 				break;
 		}
 	},

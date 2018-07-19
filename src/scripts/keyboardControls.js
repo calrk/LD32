@@ -37,3 +37,54 @@ document.addEventListener('keyup', event => {
 	return false;
 };
 */
+
+class InputController{
+	constructor(){
+		var doc = window.document;
+		var docEl = doc.documentElement;
+		this.requestFullScreen = docEl.requestFullscreen || docEl.mozRequestFullScreen || docEl.webkitRequestFullScreen || docEl.msRequestFullscreen;
+		this.cancelFullScreen = doc.exitFullscreen || doc.mozCancelFullScreen || doc.webkitExitFullscreen || doc.msExitFullscreen;
+
+		this.hammertime = new Hammer(docEl);
+
+		this.hammertime.get('swipe').set({ direction: Hammer.DIRECTION_HORIZONTAL });
+		this.hammertime.on('swipeleft', ev => {
+			this.action = 'swipeleft';
+		});
+
+		this.hammertime.on('swiperight', ev => {
+			this.action = 'swiperight';
+		});
+
+		this.hammertime.on('swipeup', ev => {
+			this.action = 'swipeup';
+		});
+
+		this.hammertime.on('swipedown', ev => {
+			this.action = 'swipedown';
+		});
+
+		// Destop swipe
+		/*this.hammertime.get('swipe').set({ direction: Hammer.DIRECTION_HORIZONTAL });
+		this.hammertime.get('pinch').set({ enable: false });*/
+
+		// Mobile controls
+		this.hammertime.get('swipe').set({ direction: Hammer.DIRECTION_ALL });
+		this.hammertime.get('pinch').set({ enable: true });
+		this.hammertime.on('pinchout', ev => {
+			// this.noSleep.enable();
+			this.requestFullScreen.call(document.documentElement);
+		});
+		this.hammertime.on('pinchin', ev => {
+			// this.noSleep.disable();
+			this.cancelFullScreen.call(document);
+		});
+	}
+}
+
+
+module.exports = {
+	keys,
+	keysDown,
+	InputController: new InputController()
+};

@@ -2,7 +2,7 @@
   "name": "LD32",
   "version": "1.0.0",
   "description": "game for LD32",
-  "main": "main.js",
+  "main": "src/index.html",
   "dependencies": {
     "babel-core": "^6.26.3",
     "babel-preset-env": "^1.7.0",
@@ -13,7 +13,10 @@
     "gulp-connect": "^2.3.1",
     "gulp-s3": "^0.3.0",
     "gulp-sourcemaps": "^2.6.4",
-    "gulp-uglify": "^1.5.4"
+    "gulp-uglify": "^1.5.4",
+    "nosleep": "^2.0.0",
+    "stats": "^1.0.0",
+    "three": "^0.94.0"
   },
   "devDependencies": {},
   "scripts": {

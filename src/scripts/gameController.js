@@ -1,9 +1,22 @@
+const THREE = require('three');
+
+const TextureLoader = require('./textures.js');
+const SoundLoader = require('./sounds.js');
+const World = require('./world.js');
+const Player = require('./player.js');
+const Ant = require('./ant.js');
+const Fly = require('./fly.js');
+const Hud = require('./hud.js');
+const Explosion = require('./explosion.js');
+
+const {keys} = require('./keyboardControls');
 
 class GameController{
 
 	constructor(params){
 		params = params || {};
 		this.scene = params.scene;
+		this.LD32 = params.LD32;
 
 		this.worldVars = {
 			length: 20,
@@ -12,12 +25,17 @@ class GameController{
 
 		this.atmosCooldown = 0;
 
-		LD32.textures.setOptions(this.worldVars);
-		// LD32.textures.generate();
+		TextureLoader.setOptions(this.worldVars);
 
-		this.world = new World(this.worldVars);
+		this.world = new World({
+			gameController: this,
+			worldVars: this.worldVars
+		});
 		this.world.createWorld();
 		this.scene.add(this.world.World());
+
+		this.clock = new THREE.Clock();
+		this.clock.start();
 
 		this.player = new Player({
 			controls:{
@@ -57,7 +75,7 @@ class GameController{
 			this.enemies[i].setPosition(x, z);
 		}
 
-		this.hud = new Hud();
+		this.hud = new Hud({gameController: this});
 		this.explosions = [];
 
 		this.state = "setup";
@@ -106,7 +124,7 @@ class GameController{
 
 				this.atmosCooldown += dt;
 				if(this.atmosCooldown > 4){
-					LD32.sounds.playAtmospheric();
+					SoundLoader.playAtmospheric();
 					this.atmosCooldown = 0 - Math.random()*2;
 				}
 
@@ -122,13 +140,13 @@ class GameController{
 
 				if(this.getRemainingInsects() == 0){
 					this.state = "won";
-					LD32.end('end');
+					this.LD32.end('end');
 					this.hud.hide();
 				}
 
 				if(!this.player.isAlive()){
 					this.state = "lost";
-					LD32.end('lost');
+					this.LD32.end('lost');
 					this.hud.hide();
 				}
 				break;
@@ -138,6 +156,10 @@ class GameController{
 				this.player.over(dt);
 				break;
 		}
+	}
+
+	restart(){
+		this.LD32.restart();
 	}
 
 	setState(){
@@ -220,4 +242,4 @@ class GameController{
 	}
 }
 
-// export default GameController;
+module.exports = GameController;

@@ -1,3 +1,5 @@
+const THREE = require('./three.min.js');
+// import THREE from './three.min.js';
 /**
  * @author Mugen87 / https://github.com/Mugen87
  */
@@ -116,3 +118,5 @@ THREE.DaydreamController = function () {
 
 THREE.DaydreamController.prototype = Object.create( THREE.Object3D.prototype );
 THREE.DaydreamController.prototype.constructor = THREE.DaydreamController;
+
+module.exports = THREE.DaydreamController;

@@ -1,13 +1,23 @@
+const THREE = require('three');
+
+const Prop = require('./prop');
+const TextureLoader = require('./textures.js');
+const ShaderLoader = require('./shaderLoader.js');
+const ModelLoader = require('./loader.js');
+
 class Torch extends Prop{
 	constructor (params) {
 		super(params);
 
 		var sceneObject = new THREE.Object3D();
-		var torch = LD32.loader.getModel('torch');
-		torch.scale.set(25,25,25);
+
+		// var torch = ModelLoader.getModel('sphere');
+		var torch = ModelLoader.getModel('torch2/scene');
+		// console.log(torch);
+		torch.scale.set(0.0064,0.0064,0.0064);
 		sceneObject.add(torch);
 		sceneObject.position.x = params.position.x;
-		sceneObject.position.y = -1;
+		sceneObject.position.y = -0.95;
 		sceneObject.position.z = params.position.z;
 		sceneObject.rotation.y = Math.random()*Math.PI*2;
 
@@ -16,7 +26,7 @@ class Torch extends Prop{
 		sceneObject.add(this.light);
 
 		this.fireUniforms = {
-			tHeightMap:  { type: "t",  value: LD32.textures.getTexture('cloud') },
+			tHeightMap:  { type: "t",  value: TextureLoader.getTexture('cloud') },
 			uColor: { type: "c", value: new THREE.Color( 0xff4800 ) },
 			time: { type: "f", value: 0.0 },
 		};
@@ -24,8 +34,8 @@ class Torch extends Prop{
 		this.displacementMaterial = new THREE.ShaderMaterial({
 			transparent:	true,
 			uniforms: this.fireUniforms,
-			vertexShader:	LD32.shaderLoader.getShader('fire_vertex'),
-			fragmentShader: LD32.shaderLoader.getShader('fire_fragment')
+			vertexShader:	ShaderLoader.getShader('fire_vertex'),
+			fragmentShader: ShaderLoader.getShader('fire_fragment')
 		});
 
 		var fire = new THREE.Mesh(new THREE.IcosahedronGeometry(0.1, 3), this.displacementMaterial);
@@ -37,7 +47,9 @@ class Torch extends Prop{
 	}
 
 	update (dt) {
-		this.light.intensity = Math.sin(LD32.clock.elapsedTime*16)*0.2+0.9;
+		this.light.intensity = Math.sin(this.gameController.clock.elapsedTime*16)*0.2+0.9;
 		this.fireUniforms.time.value += dt;
 	}
 }
+
+module.exports = Torch;

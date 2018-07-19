@@ -1,6 +1,9 @@
+const THREE = require('three');
+
 class GeometryLoader{
 
 	constructor (params) {
+		this.geometry = [];
 		this.diamondMesh = undefined;
 	}
 
@@ -58,6 +61,9 @@ class GeometryLoader{
 	}
 
 	createBody(){
+		if(this.geometry['body']){
+			return this.geometry['body'];
+		}
 		var geo = new THREE.Geometry();
 
 		geo.vertices.push(new THREE.Vector3(0, -1, 0));
@@ -124,11 +130,14 @@ class GeometryLoader{
 		var buffer = new THREE.BufferGeometry();
 		buffer = buffer.fromGeometry(geo);
 
-
+		this.geometry['body'] = buffer;
 		return buffer;
 	}
 
 	createWing(){
+		if(this.geometry['wing']){
+			return this.geometry['wing'];
+		}
 		var geo = new THREE.Geometry();
 
 		geo.vertices.push(new THREE.Vector3(0.75, 0, 0.75));
@@ -164,6 +173,58 @@ class GeometryLoader{
 		geo.faceVertexUvs[ 0 ].push( [ uva, uvd, uvb ] );//under
 
 		geo.computeFaceNormals();
+		this.geometry['wing'] = geo;
 		return geo;
 	}
+
+	createFloorCeil(){
+		if(this.geometry['floorceil']){
+			return this.geometry['floorceil'];
+		}
+
+		var geo = new THREE.BufferGeometry();
+		var vertices = Float32Array.from([
+						 1, -1,  1,
+						 1, -1, -1,
+						-1, -1, -1,
+						-1, -1,  1,
+
+						 1, 1,  1,
+						 1, 1, -1,
+						-1, 1, -1,
+						-1, 1,  1]);
+		geo.addAttribute('position', new THREE.BufferAttribute(vertices, 3));
+
+		var indices = Uint16Array.from([
+						0, 1, 2,
+						0, 2, 3,
+						4, 6, 5,
+						4, 7, 6]);
+		geo.setIndex(new THREE.BufferAttribute(indices, 1));
+
+		var uvs = Float32Array.from([
+						0, 0,
+						0, 1,
+						1, 1,
+						1, 0,
+						0, 0,
+						0, 1,
+						1, 1,
+						1, 0]);
+		geo.addAttribute('uv', new THREE.BufferAttribute(uvs, 2));
+		geo.computeVertexNormals();
+
+		this.geometry['floorceil'] = geo;
+		return geo;
+	}
+
+	createWall(){
+		if(this.geometry['wall']){
+			return this.geometry['wall'];
+		}
+		this.geometry['wall'] = new THREE.BoxBufferGeometry(2, 2, 2);
+		return this.geometry['wall'];
+	}
 }
+
+module.exports = new GeometryLoader();

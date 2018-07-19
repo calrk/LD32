@@ -1,12 +1,20 @@
+const THREE = require('three');
+
+const TextureLoader = require('./textures.js');
+const ModelLoader = require('./loader.js');
+const GeometryLoader = require('./geometryLoader.js');
+const FireFly = require('./firefly.js');
+const Torch = require('./torch.js');
 
 class World{
 
 	constructor (params) {
 		var params = params || {};
-		this.length = params.length || 100;
-		this.width = params.width || 20;
+		this.gameController = params.gameController;
+		this.length = params.worldVars.length || 100;
+		this.width = params.worldVars.width || 20;
 
-		this.world = new THREE.Object3D();
+		this.world = undefined;
 		this.content = [];
 		for(var i = 0; i < this.width+2; i++){
 			this.content[i] = [];
@@ -17,8 +25,8 @@ class World{
 
 		this.wallMat = new THREE.MeshLambertMaterial({
 			color: 0xcb6e00,
-			map: LD32.textures.getTexture('wall'),
-			// normalMap: LD32.textures.getTexture('noiseNorm')
+			map: TextureLoader.getTexture('wall'),
+			// normalMap: TextureLoader.getTexture('noiseNorm')
 		});
 		this.ceilMat = this.wallMat;
 		this.floorMat = this.wallMat;
@@ -26,7 +34,7 @@ class World{
 		this.dustMaterial = new THREE.PointsMaterial({
 			color: 0x743f00,
 			size: 0.1,
-			map: LD32.textures.getTexture('dust'),
+			map: TextureLoader.getTexture('dust'),
 			blending: THREE.AdditiveBlending,
 			transparent: true
 		});
@@ -44,7 +52,7 @@ class World{
 
 	update (dt){
 		for(var i = 0; i < this.dustSystems.length; i++){
-			this.dustSystems[i].position.y = Math.sin(LD32.clock.elapsedTime/10+this.dustSystems[i].offset);
+			this.dustSystems[i].position.y = Math.sin(this.gameController.clock.elapsedTime/10+this.dustSystems[i].offset);
 		}
 
 		for(var i = 0; i < this.fireflies.length; i++){
@@ -58,6 +66,30 @@ class World{
 
 	createWorld () {
 		this.world = new THREE.Object3D();
+
+		/*var wall = this.createWall();
+		// this.world.add(wall);
+		var wall = this.createEmpty();
+		this.world.add(wall);*/
+
+		for(var j = 0; j < 5; j++){
+			var pos = new THREE.Vector3(Math.floor(Math.random()*this.width), -1, Math.floor(Math.random()*this.length));
+			while(!this.canMove(pos.x, pos.z)){
+				pos.x = Math.floor(Math.random()*this.width);
+				pos.z = Math.floor(Math.random()*this.length);
+			}
+			pos.x *= 2;
+			pos.z *= 2;
+			pos.z += Math.random() < 0.5 ? -0.9 : 0.9;
+			pos.x += Math.random() < 0.5 ? -0.9 : 0.9;
+
+			var torch = new Torch({
+				position: pos,
+				scene: this.world,
+				gameController: this.gameController
+			});
+			this.torches.push(torch);
+		}
 
 		//add outside walls
 		for(var i = 0; i < this.width+2; i++){
@@ -131,28 +163,11 @@ class World{
 
 			var firefly = new FireFly({
 				position: pos,
-				scene: this.world
+				scene: this.world,
+				gameController: this.gameController
 			});
 
 			this.fireflies.push(firefly);
-		}
-
-		for(var j = 0; j < 5; j++){
-			var pos = new THREE.Vector3(Math.floor(Math.random()*this.width), -1, Math.floor(Math.random()*this.length));
-      while(!this.canMove(pos.x, pos.z)){
-        pos.x = Math.floor(Math.random()*this.width);
-        pos.z = Math.floor(Math.random()*this.length);
-      }
-      pos.x *= 2;
-      pos.z *= 2;
-      pos.z += Math.random() < 0.5 ? -0.9 : 0.9;
-      pos.x += Math.random() < 0.5 ? -0.9 : 0.9;
-
-			var torch = new Torch({
-				position: pos,
-				scene: this.world
-			});
-			this.torches.push(torch);
 		}
 	}
 
@@ -250,11 +265,6 @@ class World{
 		return object;
 	}
 
-	createWall () {
-		var wall = new THREE.Mesh(new THREE.BoxBufferGeometry(2, 2, 2), this.wallMat);
-		return wall;
-	}
-
 	canMove (i , j){
 		if(i < 0 || j < 0){
 			return false;
@@ -271,45 +281,15 @@ class World{
 		return this.world;
 	}
 
+	createWall () {
+		var wall = new THREE.Mesh(GeometryLoader.createWall(), this.wallMat);
+		return wall;
+	}
+
 	createEmpty () {
-		var geo = new THREE.BufferGeometry();
-
-		var vertexCount = 8;
-		var vertices = new Float32Array(vertexCount * 3);
-		vertices = Float32Array.from([
-						 1, -1,  1,
-						 1, -1, -1,
-						-1, -1, -1,
-						-1, -1,  1,
-
-						 1, 1,  1,
-						 1, 1, -1,
-						-1, 1, -1,
-						-1, 1,  1]);
-		geo.addAttribute('position', new THREE.BufferAttribute(vertices, 3));
-
-		var indices = new Uint16Array(vertexCount * 3);
-		indices = Uint16Array.from([
-						0, 1, 2,
-						0, 2, 3,
-						4, 6, 5,
-						4, 7, 6]);
-		geo.setIndex(new THREE.BufferAttribute(indices, 1));
-
-		var uvs = new Float32Array(vertexCount * 2);
-		uvs = Float32Array.from([
-						0, 0,
-						0, 1,
-						1, 1,
-						1, 0,
-						0, 0,
-						0, 1,
-						1, 1,
-						1, 0]);
-		geo.addAttribute('uv', new THREE.BufferAttribute(uvs, 2));
-
-		geo.computeVertexNormals();
-		var floor = new THREE.Mesh(geo, this.floorMat);
+		var floor = new THREE.Mesh(GeometryLoader.createFloorCeil(), this.floorMat);
 		return floor;
 	}
 }
+
+module.exports = World;

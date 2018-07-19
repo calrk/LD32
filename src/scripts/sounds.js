@@ -10,13 +10,13 @@ class SoundLoader{
 
 		this.audio = new AudioContext();
 		this.audioGain = this.audio.createGain();
-		this.volume = 0.15;
+		this.volume = 0;//0.15;
 		// this.audioGain.gain.value = 0.15;
 		this.audioCompressor = this.audio.createDynamicsCompressor();
 
 		this.atmosAudio = new AudioContext();
 		this.atmosGain = this.atmosAudio.createGain();
-		this.atmosGainValue = 0.25;
+		this.atmosGainValue = 0;//0.25;
 
 		this.loadSound('dirt_step_1');
 		this.loadSound('dirt_step_2');
@@ -139,3 +139,5 @@ class SoundLoader{
 		source.start(0);
 	}
 }
+
+module.exports = new SoundLoader();

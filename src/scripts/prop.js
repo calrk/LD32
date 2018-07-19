@@ -5,6 +5,7 @@ class Prop{
 		params = params || {};
 		this.scene = params.scene;
 		this.sceneObject = undefined;
+		this.gameController = params.gameController;
 
 		// add to props array in gameController
 		// add this to scene
@@ -15,6 +16,8 @@ class Prop{
 	}
 
 	destroy () {
-		this.scene.remove(this.sceneObject);
+		// this.scene.remove(this.sceneObject);
 	}
 }
+
+module.exports = Prop;

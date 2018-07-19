@@ -1,3 +1,5 @@
+const CLARITY = require('../resources/clarity.min.js');
+const THREE = require('three');
 
 class TextureLoader{
 	constructor(){
@@ -156,3 +158,5 @@ class TextureLoader{
 		};
 	}
 }
+
+module.exports = new TextureLoader();

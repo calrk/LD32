@@ -1,3 +1,5 @@
+const THREE = require('three');
+const TextureLoader = require('./textures.js');
 
 class Explosion{
 
@@ -50,12 +52,12 @@ class Explosion{
 	}
 }
 
-window.addEventListener('load', () => {
-	Explosion.bloodMaterial = new THREE.PointsMaterial({
-		color: 0xFF0000,
-		size: 0.1,
-		map: LD32.textures.getTexture('blood'),
-		blending: THREE.AdditiveBlending,
-		transparent: true
-	});
+Explosion.bloodMaterial = new THREE.PointsMaterial({
+	color: 0xFF0000,
+	size: 0.1,
+	map: TextureLoader.getTexture('blood'),
+	blending: THREE.AdditiveBlending,
+	transparent: true
 });
+
+module.exports = Explosion;

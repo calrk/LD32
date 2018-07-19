@@ -1,17 +1,8 @@
-window.addEventListener('load', () => {
-	Fly.bodymat = new THREE.MeshLambertMaterial({
-		color: 0x1b5c00,
-		map: LD32.textures.getTexture('cloud'),
-		// normalMap: LD32.textures.getTexture('noiseNorm')
-	});
-	Fly.eyemat = new THREE.MeshPhongMaterial({
-		shininess: 10,
-		color: 0x4c0000,
-		specular: 0x620000,
-		map: LD32.textures.getTexture('cloud'),
-		normalMap: LD32.textures.getTexture('noiseNorm')
-	});
-});
+const THREE = require('three');
+
+const Actor = require('./actor.js');
+const TextureLoader = require('./textures.js');
+const GeometryLoader = require('./geometryLoader.js');
 
 class Fly extends Actor{
 
@@ -62,11 +53,11 @@ class Fly extends Actor{
 	update (dt) {
 		super.update(dt);
 		if(this.isAlive()){
-			this.model.position.y = Math.sin(LD32.clock.elapsedTime*2)/10;
+			this.model.position.y = Math.sin(this.gameController.clock.elapsedTime*2)/10;
 
 			if(this.isAlive()){
-				this.hierarchy.wing1.rotation.x = -Math.PI/6 + Math.sin(LD32.clock.elapsedTime*40)/7;
-				this.hierarchy.wing2.rotation.x = -Math.PI/6 + Math.sin(LD32.clock.elapsedTime*40)/7;
+				this.hierarchy.wing1.rotation.x = -Math.PI/6 + Math.sin(this.gameController.clock.elapsedTime*40)/7;
+				this.hierarchy.wing2.rotation.x = -Math.PI/6 + Math.sin(this.gameController.clock.elapsedTime*40)/7;
 			}
 			else{
 				this.prevHeight = this.model.position.y;
@@ -89,7 +80,7 @@ class Fly extends Actor{
 		this.model.add(neck);
 
 		var head = this.createJoint(0);
-		var headMesh = this.createDiamond([0.5, 0.5, 0.5], Fly.bodymat);
+		var headMesh = GeometryLoader.createDiamond([0.5, 0.5, 0.5], Fly.bodymat);
 		head.position.z = -0.25;
 		neck.add(head);
 		head.add(headMesh);
@@ -120,7 +111,7 @@ class Fly extends Actor{
 		abo.rotation.x = Math.PI/5;
 		this.model.add(abo);
 
-		var abdo = this.createDiamond([0.6, 0.6, 0.75], Fly.bodymat);
+		var abdo = GeometryLoader.createDiamond([0.6, 0.6, 0.75], Fly.bodymat);
 		abdo.position.z = 1;
 		abo.add(abdo);
 
@@ -215,7 +206,7 @@ class Fly extends Actor{
 		this.idleAnim();
 		if(this.lastMoveTime > this.idleTime){
 			var rand = Math.random()*8;
-			var direction = LD32.gameController.player.model.position.clone().sub(this.model.position);
+			var direction = this.gameController.player.model.position.clone().sub(this.model.position);
 			direction.round();
 			var dot = direction.dot(this.right.clone())
 
@@ -264,7 +255,7 @@ class Fly extends Actor{
 		}
 		hip.rotation.z = Math.PI/3;
 
-		var upperLeg = this.createDiamond([0.3, 0.15, 0.15], Fly.bodymat);
+		var upperLeg = GeometryLoader.createDiamond([0.3, 0.15, 0.15], Fly.bodymat);
 		upperLeg.position.x = -0.3;
 		hip.add(upperLeg);
 
@@ -274,7 +265,7 @@ class Fly extends Actor{
 		knee.rotation.z = Math.PI/3;
 		hip.add(knee);
 
-		var lowerLeg = this.createDiamond([0.3, 0.15, 0.15], Fly.bodymat);
+		var lowerLeg = GeometryLoader.createDiamond([0.3, 0.15, 0.15], Fly.bodymat);
 		lowerLeg.position.x = -0.3;
 		knee.add(lowerLeg);
 
@@ -284,7 +275,7 @@ class Fly extends Actor{
 		ankle.rotation.z = -Math.PI/5;
 		knee.add(ankle);
 
-		var foot = this.createDiamond([0.15, 0.1, 0.1], this.blackMat);
+		var foot = GeometryLoader.createDiamond([0.15, 0.1, 0.1], this.blackMat);
 		foot.position.x = -0.15;
 		ankle.add(foot);
 
@@ -295,11 +286,11 @@ class Fly extends Actor{
 	}
 
 	createWing (mat) {
-		return new THREE.Mesh(LD32.geometry.createWing(), new THREE.MeshLambertMaterial({color: 0x000000, transparent: true, opacity: 0.5}));
+		return new THREE.Mesh(GeometryLoader.createWing(), new THREE.MeshLambertMaterial({color: 0x000000, transparent: true, opacity: 0.5}));
 	}
 
 	createBody () {
-		var mesh = new THREE.Mesh(LD32.geometry.createBody(), Fly.bodymat);
+		var mesh = new THREE.Mesh(GeometryLoader.createBody(), Fly.bodymat);
 		mesh.rotation.x = Math.PI/2;
 		var parent = new THREE.Object3D();
 		parent.add(mesh);
@@ -364,3 +355,18 @@ class Fly extends Actor{
 		this.model.rotation.y = this.model.rotation.y += 0.005;
 	}
 }
+
+Fly.bodymat = new THREE.MeshLambertMaterial({
+	color: 0x1b5c00,
+	map: TextureLoader.getTexture('cloud'),
+	// normalMap: TextureLoader.getTexture('noiseNorm')
+});
+Fly.eyemat = new THREE.MeshPhongMaterial({
+	shininess: 10,
+	color: 0x4c0000,
+	specular: 0x620000,
+	map: TextureLoader.getTexture('cloud'),
+	normalMap: TextureLoader.getTexture('noiseNorm')
+});
+
+module.exports = Fly;

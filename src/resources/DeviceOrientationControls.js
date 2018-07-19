@@ -1,3 +1,4 @@
+const THREE = require('./three.min.js');
 /**
  * @author richt / http://richt.me
  * @author WestLangley / http://github.com/WestLangley
@@ -109,3 +110,5 @@ THREE.DeviceOrientationControls = function( object ) {
 	this.connect();
 
 };
+
+module.exports = THREE.DeviceOrientationControls;

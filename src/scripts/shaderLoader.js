@@ -42,3 +42,5 @@ class ShaderLoader{
 		return false;
 	}
 }
+
+module.exports = new ShaderLoader();
